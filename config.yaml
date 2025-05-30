@@ -1,0 +1,24 @@
+file_path: .\STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136.xlsx
+
+independent_var:
+  - BMI
+  - Kuřák v době vzniku příznaků iCMP/TIA
+  - Abusus alkoholu
+  - Osobní anamnéza (choice=Hyperlipidémie)
+  - Časový odstup od iCMP/TIA 
+  - Rozměr levé síně
+  - Enddiastolický rozměr levé komory (LVEDD)
+  - Interventrikulární septum (IVS)
+  - Zadní stěna levé komory (Inferolat.)
+  - Ejekční frakce levé komory (LVEF)
+  - Celkový cholesterol
+  - LDL
+  - HDL
+  - TAG
+  - eGFR
+  - Sérový kreatinin
+  - SVES - počet záznamů 
+  - KES - počet záznamů
+
+reference_var:
+  - outcome

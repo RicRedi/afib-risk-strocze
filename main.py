@@ -1,22 +1,41 @@
-""" Correlations Analysis
+# -*- coding: utf-8 -*-
+
+"""
+Created on 30. 05. 2025 at 15:08:33
+
+Author: Richard Redina
+Email: 195715@vut.cz
+Affiliation:
+         International Clinical Research Center, Brno
+         Brno University of Technology, Brno
+GitHub: RicRedi
+
+(._.)
+ <|>
+_/|_
+
+Description:
+    Correlations Analysis
 This script analyzes the correlation between a set of variables
 and a reference variable in a dataset.
 """
+import yaml
 import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.linear_model import LogisticRegression
 import statsmodels.api as sm
+from sklearn.linear_model import LogisticRegression
+from core import validate_inputs_from_signature
 
 def analyze_correlations(
-    file_path,
-    variables,
-    reference_var,
-    binary_reference=False,
-    significance_level=0.05
-    ):
+    file_path: str = None,
+    variables: list = None,
+    reference_var: str = None,
+    binary_reference: bool = False,
+    significance_level: float = 0.05
+    ) -> None:
     """_summary_
     Args:
         file_path (_type_): _description_
@@ -25,8 +44,13 @@ def analyze_correlations(
         binary_reference (bool, optional): _description_. Defaults to False.
         significance_level (float, optional): _description_. Defaults to 0.05.
     """
+    validate_inputs_from_signature(analyze_correlations, locals())
+
     # Load data
-    df = pd.read_csv(file_path)
+    df = pd.read_excel(
+        file_path,
+        )
+    headers = df.columns.tolist()
     results = []
 
     for var in variables:
@@ -86,9 +110,17 @@ def analyze_correlations(
     print(pd.DataFrame(results))
 
 # Example usage:
-# analyze_correlations(
-#     file_path='your_table.csv',
-#     variables=['age', 'bmi', 'bp', 'cholesterol'],
-#     reference_var='outcome',
-#     binary_reference=True
-# )
+
+with open(
+    'config.yaml',
+    'r',
+    encoding = 'utf-8'
+    ) as file:
+    config = yaml.safe_load(file)
+
+analyze_correlations(
+    file_path = config['file_path'],
+    variables = config['independent_var'],
+    reference_var = config['reference_var'],
+    binary_reference = True
+)
