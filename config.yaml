@@ -5,7 +5,7 @@ independent_var:
   - Kuřák v době vzniku příznaků iCMP/TIA
   - Abusus alkoholu
   - Osobní anamnéza (choice=Hyperlipidémie)
-  - Časový odstup od iCMP/TIA 
+  - Časový odstup od iCMP/TIA
   - Rozměr levé síně
   - Enddiastolický rozměr levé komory (LVEDD)
   - Interventrikulární septum (IVS)
@@ -17,8 +17,8 @@ independent_var:
   - TAG
   - eGFR
   - Sérový kreatinin
-  - SVES - počet záznamů 
+  - SVES - počet záznamů
   - KES - počet záznamů
 
-reference_var:
-  - outcome
+reference_var: Záchyt FiS
+  

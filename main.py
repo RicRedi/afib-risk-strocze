@@ -32,7 +32,7 @@ from core import validate_inputs_from_signature
 def analyze_correlations(
     file_path: str = None,
     variables: list = None,
-    reference_var: str = None,
+    reference_var: list = None,
     binary_reference: bool = False,
     significance_level: float = 0.05
     ) -> None:
@@ -49,8 +49,8 @@ def analyze_correlations(
     # Load data
     df = pd.read_excel(
         file_path,
+        usecols = variables + [reference_var],
         )
-    headers = df.columns.tolist()
     results = []
 
     for var in variables:
