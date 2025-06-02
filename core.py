@@ -62,3 +62,45 @@ def convert_column_to_binary(
         'yes': 1, 'y': 1, 'true': 1, '1': 1, 'Checked': 1, 'Ano': 1,
         'no': 0, 'n': 0, 'false': 0, '0': 0, 'Unchecked': 0, 'Ne': 0,
     }).values
+
+def remove_outliers_iqr(
+    x: pd.Series,
+    threshold: float = 1.5
+    ) -> pd.Series:
+    """Removes outliers from a pandas Series using the Interquartile Range (IQR) method.
+    The function calculates the first (Q1) and third quartiles (Q3) of the data,
+    computes the IQR, and identifies outliers as values that fall below Q1 - threshold * IQR
+    or above Q3 + threshold * IQR. It returns a new Series with outliers removed.
+    Args:
+        x (pd.Series): Input pandas Series from which to remove outliers.
+        threshold (float, optional): Multiplier for the IQR to define outliers. Defaults to 1.5.
+    Returns:
+        pd.Series: A new pandas Series with outliers removed.
+    """
+    q1 = x.quantile(0.25)
+    q3 = x.quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - threshold * iqr
+    upper_bound = q3 + threshold * iqr
+    return x[(x >= lower_bound) & (x <= upper_bound)].reset_index(drop=True)
+
+def remove_outliers_z_score(
+    x: pd.Series,
+    threshold: float = 3.0
+    ) -> pd.Series:
+    """Removes outliers from a pandas Series using the Z-score method.
+    The function calculates the mean and standard deviation of the data,
+    computes the Z-scores, and identifies outliers as values with an absolute Z-score
+    greater than the specified threshold. It returns a new Series with outliers removed.
+    
+    Args:
+        x (pd.Series): Input pandas Series from which to remove outliers.
+        threshold (float, optional): Z-score threshold to define outliers. Defaults to 3.0.
+        
+    Returns:
+        pd.Series: A new pandas Series with outliers removed.
+    """
+    mean = x.mean()
+    std_dev = x.std()
+    z_scores = (x - mean) / std_dev
+    return x[abs(z_scores) <= threshold].reset_index(drop=True)

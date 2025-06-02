@@ -23,18 +23,16 @@ import yaml
 import pandas as pd
 import numpy as np
 from scipy.stats import pearsonr
-import matplotlib.pyplot as plt
-import seaborn as sns
 import statsmodels.api as sm
-from sklearn.linear_model import LogisticRegression
-from core import validate_inputs_from_signature, convert_column_to_binary
+from core import validate_inputs_from_signature, convert_column_to_binary, remove_outliers_iqr
+from plotting import CorrelationPlotter
 
 def analyze_correlations(
     file_path: str = None,
     variables: list = None,
     reference_var: list = None,
     significance_level: float = 1.0,
-    ) -> None:
+    ) -> pd.DataFrame:
     """_summary_
     Args:
         file_path (_type_): _description_
@@ -55,13 +53,14 @@ def analyze_correlations(
 
     for var in variables:
         print(f'Analyzing correlation for variable: {var}')
-        
+
         x = df[var].apply(
             lambda x: np.nan if isinstance(x, str) else x
             ).replace(
                 [np.inf, -np.inf], np.nan
                 ).dropna()
-
+        # Remove outliers using IQR method
+        x = remove_outliers_iqr(x)
         # Align indices
         common_idx = x.index.intersection(y.index)
         x = x.loc[common_idx]
@@ -85,31 +84,20 @@ def analyze_correlations(
             'p_value': p_value,
             'type': corr_type
         })
-
+        plotter = CorrelationPlotter(
+            var=var,
+            reference_var=reference_var,
+            coef=coef,
+            p_value=p_value
+        )
         # Plot if significant
         if p_value < significance_level:
-            plt.figure()
-            if corr_type == 'logistic':
-                # Fit logistic regression for plot
-                lr = LogisticRegression()
-                lr.fit(x.values.reshape(-1, 1), yy)
-                x_plot = np.linspace(x.min(), x.max(), 100)
-                y_prob = lr.predict_proba(x_plot.reshape(-1, 1))[:, 1]
-                plt.plot(x_plot, y_prob, label='Logistic fit')
-                plt.scatter(x, yy, alpha=0.5, label='Data')
-                plt.ylabel(f'{reference_var} (probability)')
-            else:
-                sns.regplot(x=x, y=yy, logistic=False, ci=None)
-                plt.ylabel(reference_var)
-            plt.xlabel(var)
-            plt.title(f'{corr_type.capitalize()} correlation: {var} vs {reference_var}\n'
-                      f'Coef={coef:.3f}, p={p_value:.3g}')
-            plt.legend()
-            plt.tight_layout()
-            plt.show(block = False)
+            plotter.plot(
+                x=x,
+                y=yy,
+            )
 
-    # Print summary
-    print(pd.DataFrame(results))
+    return pd.DataFrame(results)
 
 # Example usage:
 
@@ -122,10 +110,16 @@ with open(
         file,
         )
 
-analyze_correlations(
+output = analyze_correlations(
     file_path = config['file_path'],
     variables = config['independent_continuous_variables'],
     reference_var = config['reference_var'],
+)
+# Save results to CSV
+output.to_csv(
+    'correlation_results.csv',
+    index = False,
+    encoding = 'utf-8',
 )
 print('Done with continuous variables analysis!')
 # Dodělat......
