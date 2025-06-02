@@ -4,13 +4,13 @@
 # Ensure that the file paths are correct and accessible.
 
 # File paths
-file_path: .\STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136.xlsx
+file_path: ./src/STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136.xlsx
 # Output file path for analysis results
 save_results: True
-save_plots: True
-save_path: .\analysis_results
+save_path: ./results
 # Significance level for statistical tests
 significance_level: 1.0
 
-variables: .\variables.yaml
+plotting: ./config/plotting.yaml
+variables: ./config/variables.yaml
   

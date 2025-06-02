@@ -15,7 +15,8 @@ GitHub: RicRedi
 _/|_
 
 Description:
-    Short description of the script.
+    Module for loading configuration from a YAML file and converting it into a ConfigObject.
+    This allows for dynamic attribute access based on the keys in the configuration dictionary.
 """
 import os
 import yaml
@@ -52,7 +53,7 @@ class ConfigObject:
                     nested_data = yaml.safe_load(f)
                 value = ConfigObject(nested_data, base_path=os.path.dirname(nested_path))
             setattr(self, key, value)
-    
+
     def __repr__(self):
         return f"{self.__class__.__name__}({self.__dict__})"
 

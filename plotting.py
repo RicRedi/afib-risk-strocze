@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LogisticRegression
+from config_singleton import ConfigSingleton
 
 class CorrelationPlotter:
     """
@@ -51,12 +52,14 @@ class CorrelationPlotter:
             coef (float): Coefficient from the regression analysis.
             p_value (float): P-value from the regression analysis.
         """
+        self.cfg = ConfigSingleton.get().plotting
         self.var = var
         self.ref = reference_var
         self.coef = coef
         self.p_value = p_value
         # make a dir for plots if it does not exist
-        os.makedirs('./plots', exist_ok=True)
+        if self.cfg.save_plots:
+            os.makedirs('./results/plots', exist_ok=True)
 
     def plot_logistic(
         self,
@@ -116,14 +119,13 @@ class CorrelationPlotter:
             cbar=False
         )
 
-
     def plot(
         self,
         x: pd.Series | np.ndarray,
         y: pd.Series | np.ndarray,
-        save: bool = False,
         ) -> None:
-        """Plot the correlation based on the type of dependent variable.
+        """
+        Plot the correlation based on the type of dependent variable.
         Args:
             x (pd.Series | np.ndarray): Independent variable data.
             y (pd.Series | np.ndarray): Dependent variable data.
@@ -133,16 +135,19 @@ class CorrelationPlotter:
         # Validate input types and values
         self.__check__(x, y)
 
-        plt.figure(figsize=(10, 6))
+        plt.figure(
+            figsize = (
+                self.cfg.figsize.width,
+                self.cfg.figsize.height
+                )
+            )
         if len(np.unique(y)) == 2 and len(np.unique(x)) == 2:
             self.plot_binary_heatmap(x,y)
         elif len(np.unique(y)) == 2:
             self.plot_logistic(x, y)
         else:
             self.plot_continuous(x, y)
-        self.__add_meta_to_plot__(
-            save=save
-            )
+        self.__add_meta_to_plot__()
 
     def __check__(
         self,
@@ -179,8 +184,6 @@ class CorrelationPlotter:
 
     def __add_meta_to_plot__(
         self,
-        save: bool = False,
-        block: bool = False,
         ) -> None:
         """
         Add metadata to the plot, including variable names, coefficients, and p-values.
@@ -196,26 +199,45 @@ class CorrelationPlotter:
         
         This method is typically called after plotting the data to enhance the plot
         """
-        plt.ylabel(f'{self.ref}')
-        plt.xlabel(self.var)
+        plt.xticks(
+            fontsize = self.cfg.fontsize.tick,
+            )
+        plt.yticks(
+            fontsize = self.cfg.fontsize.tick,
+            )
+        plt.ylabel(
+            f'{self.ref}',
+            fontsize = self.cfg.fontsize.ylabel,
+            )
+        plt.xlabel(
+            self.var,
+            fontsize = self.cfg.fontsize.xlabel,
+            )
         plt.title(f'Logistic correlation: {self.var} vs {self.ref}\n'
-                  f'Coef={self.coef:.3f}, p={self.p_value:.3g}')
+                  f'Coef={self.coef:.3f}, p={self.p_value:.3g}',
+                  fontsize = self.cfg.fontsize.title,
+                  )
         plt.tight_layout()
-        if save:
+        if self.cfg.save_plots:
             var_safe = self._sanitize_filename_part(self.var)
             ref_safe = self._sanitize_filename_part(self.ref)
-            plt.savefig(
-                f'./plots/{var_safe}_vs_{ref_safe}.png',
-                dpi=300,
-                bbox_inches='tight',
-                )
-        plt.show(block=block)
+            try:
+                plt.savefig(
+                    self.cfg.save_path + f'/{var_safe}_vs_{ref_safe}.png',
+                    dpi=300,
+                    bbox_inches='tight',
+                    )
+            except OSError as e:
+                print(f"Error saving plot: {e}")
+        if self.cfg.show_plots:
+            plt.show(block = self.cfg.block_plots)
 
     def _sanitize_filename_part(
         self,
         s: str,
         ) -> str:
-        """Sanitize a string to be used as a part of a filename.
+        """
+        Sanitize a string to be used as a part of a filename.
         This function replaces any character that is not alphanumeric, underscore, or hyphen
         with an underscore. It is useful for creating valid filenames from variable names.
         Args:

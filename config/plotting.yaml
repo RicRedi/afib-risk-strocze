@@ -1,0 +1,24 @@
+# Configuration file for plotting settings
+# This file contains settings for plotting the results of the analysis.
+# Ensure that the file paths are correct and accessible.
+
+# Saving plots settings
+save_plots: True
+save_path: ./results/plots
+
+# Show plots in the notebook or script
+show_plots: False
+block_plots: False
+
+# Plotting settings
+figsize:
+  width: 10
+  height: 6
+
+# Fontsize settings for plots
+fontsize:
+  title: 16
+  xlabel: 14
+  ylabel: 14
+  legend: 12
+  tick: 12

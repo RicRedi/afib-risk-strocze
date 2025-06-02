@@ -15,8 +15,9 @@ GitHub: RicRedi
 _/|_
 
 Description:
-    
-    Last modified on 01. 06. 2025 at 18:43:59
+    Module containing utility functions for data validation and preprocessing.
+    This module includes functions to validate function inputs, convert binary columns,
+    and remove outliers using IQR and Z-score methods.
 """
 import inspect
 from typing import Callable, Dict
