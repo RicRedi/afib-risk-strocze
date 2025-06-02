@@ -9,7 +9,7 @@ z_score_threshold: 3.0
 significance_level: 0.05
 
 # Output print settings
-print_output: False
+print_progress: False
 
 # Output file path for analysis results
 save_results: True

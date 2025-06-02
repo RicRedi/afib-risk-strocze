@@ -35,7 +35,6 @@ from core import (
 from plotting import CorrelationPlotter  # assumes your plotting class is here
 from utils.config_singleton import ConfigSingleton
 
-
 class VariableCorrelationAnalyzer:
     """
     Class for analyzing correlations between a set of variables and a reference variable.

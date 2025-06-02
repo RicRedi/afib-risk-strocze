@@ -19,7 +19,7 @@ Description:
     This ensures that the configuration is loaded only once
     and can be accessed globally.
 """
-from load_config import load_config_as_object
+from utils.load_config import load_config_as_object
 
 class ConfigSingleton:
     """

@@ -16,7 +16,6 @@ _/|_
 
 Description:
     Correlations Analysis
-
 """
 from analyze import VariableCorrelationAnalyzer
 from utils.config_singleton import ConfigSingleton

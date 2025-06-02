@@ -11,4 +11,6 @@ analysis: ./config/analysis.yaml
 
 # Variables configuration file
 variables: ./config/variables.yaml
-  
+
+# Configuration file for model settings
+model: ./config/model.yaml
