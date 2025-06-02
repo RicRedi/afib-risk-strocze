@@ -67,13 +67,7 @@ class CorrelationPlotter:
 
         plt.plot(x_plot, y_prob, label='Logistic fit')
         plt.scatter(x, y, alpha=0.5, label='Data')
-        plt.ylabel(f'{self.ref} (probability)')
-        plt.xlabel(self.var)
-        plt.title(f'Logistic correlation: {self.var} vs {self.ref}\n'
-                  f'Coef={self.coef:.3f}, p={self.p_value:.3g}')
         plt.legend()
-        plt.tight_layout()
-        plt.show(block=False)
 
     def plot_continuous(
         self,
@@ -82,25 +76,45 @@ class CorrelationPlotter:
         ) -> None:
         """Plot correlation for continuous outcome."""
         sns.regplot(x=x, y=y, line_kws={'label': 'Regression line'})
-        plt.ylabel(self.ref)
-        plt.xlabel(self.var)
-        plt.title(f'Continuous correlation: {self.var} vs {self.ref}\n'
-                  f'Coef={self.coef:.3f}, p={self.p_value:.3g}')
         plt.legend()
-        plt.tight_layout()
-        plt.show(block=False)
+
+    def plot_binary_heatmap(
+        self,
+        x: pd.Series | np.ndarray,
+        y: pd.Series | np.ndarray,
+        ) -> None:
+        """Plot binary bars for binary independent variable."""
+        # Create 2x2 contingency table
+        contingency = pd.crosstab(x, y)
+        # Plot heatmap
+        sns.heatmap(
+            contingency,
+            annot=True,
+            fmt='d',
+            cmap='Blues',
+            cbar=False
+        )
+
 
     def plot(
         self,
         x: pd.Series | np.ndarray,
         y: pd.Series | np.ndarray,
         ) -> None:
-        """Plot the correlation based on the type of dependent variable."""
+        """Plot the correlation based on the type of dependent variable.
+        Args:
+            x (pd.Series | np.ndarray): Independent variable data.
+            y (pd.Series | np.ndarray): Dependent variable data.
+        Returns:
+            None
+        """
         # Validate input types and values
         self.__check__(x, y)
 
         plt.figure(figsize=(10, 6))
-        if len(np.unique(y)) == 2:
+        if len(np.unique(y)) == 2 and len(np.unique(x)) == 2:
+            self.plot_binary_heatmap(x,y)
+        elif len(np.unique(y)) == 2:
             self.plot_logistic(x, y)
         else:
             self.plot_continuous(x, y)
@@ -156,10 +170,9 @@ class CorrelationPlotter:
         
         This method is typically called after plotting the data to enhance the plot
         """
-        plt.ylabel(f'{self.ref} (probability)')
+        plt.ylabel(f'{self.ref}')
         plt.xlabel(self.var)
         plt.title(f'Logistic correlation: {self.var} vs {self.ref}\n'
                   f'Coef={self.coef:.3f}, p={self.p_value:.3g}')
-        plt.legend()
         plt.tight_layout()
         plt.show(block=False)

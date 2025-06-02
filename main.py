@@ -23,10 +23,3 @@ from analyze import VariableCorrelationAnalyzer
 analyzer = VariableCorrelationAnalyzer("config.yaml")
 analyzer.pipeline()
 print("done")
-# Dodělat......
-# analyze_binary_correlations(
-#     file_path = config['file_path'],
-#     variables = config['independent_binary_variables'],
-#     reference_var = config['reference_var'],
-#     significance_level = 0.05
-# )

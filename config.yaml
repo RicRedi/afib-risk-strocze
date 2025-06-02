@@ -7,8 +7,7 @@
 file_path: .\STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136.xlsx
 # Output file path for analysis results
 save_results: True
-save_path: .\analysis_results.json
-
+save_path: .\analysis_results
 # Significance level for statistical tests
 significance_level: 1.0
 
@@ -31,7 +30,7 @@ independent_continuous_variables:
   - KES - počet záznamů
 
 # Independent categorical variables
-independent_binar_var:
+independent_binary_variables:
   - Kuřák v době vzniku příznaků iCMP/TIA
   - Abusus alkoholu
   - Osobní anamnéza (choice=Hyperlipidémie)
