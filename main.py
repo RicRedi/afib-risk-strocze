@@ -19,7 +19,7 @@ Description:
 
 """
 from analyze import VariableCorrelationAnalyzer
-from config_singleton import ConfigSingleton
+from utils.config_singleton import ConfigSingleton
 
 ConfigSingleton.set()
 analyzer = VariableCorrelationAnalyzer()

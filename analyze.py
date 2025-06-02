@@ -33,7 +33,7 @@ from core import (
     remove_outliers_iqr
 )
 from plotting import CorrelationPlotter  # assumes your plotting class is here
-from config_singleton import ConfigSingleton
+from utils.config_singleton import ConfigSingleton
 
 
 class VariableCorrelationAnalyzer:

@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LogisticRegression
-from config_singleton import ConfigSingleton
+from utils.config_singleton import ConfigSingleton
 
 class CorrelationPlotter:
     """
