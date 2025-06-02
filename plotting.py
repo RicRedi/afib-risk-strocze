@@ -17,6 +17,8 @@ _/|_
 Description:
     Script for plotting correlations between variables.
 """
+import os
+import re
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -53,6 +55,8 @@ class CorrelationPlotter:
         self.ref = reference_var
         self.coef = coef
         self.p_value = p_value
+        # make a dir for plots if it does not exist
+        os.makedirs('./plots', exist_ok=True)
 
     def plot_logistic(
         self,
@@ -62,11 +66,24 @@ class CorrelationPlotter:
         """Plot logistic regression for binary outcomes."""
         lr = LogisticRegression()
         lr.fit(x.values.reshape(-1, 1), y)
-        x_plot = np.linspace(x.min(), x.max(), 100)
+        x_plot = np.linspace(
+            x.min(),
+            x.max(),
+            100,
+            )
         y_prob = lr.predict_proba(x_plot.reshape(-1, 1))[:, 1]
 
-        plt.plot(x_plot, y_prob, label='Logistic fit')
-        plt.scatter(x, y, alpha=0.5, label='Data')
+        plt.plot(
+            x_plot,
+            y_prob,
+            label='Logistic fit',
+            )
+        plt.scatter(
+            x,
+            y,
+            alpha=0.5,
+            label='Data',
+            )
         plt.legend()
 
     def plot_continuous(
@@ -75,7 +92,11 @@ class CorrelationPlotter:
         y: pd.Series | np.ndarray,
         ) -> None:
         """Plot correlation for continuous outcome."""
-        sns.regplot(x=x, y=y, line_kws={'label': 'Regression line'})
+        sns.regplot(
+            x = x,
+            y = y,
+            line_kws={'label': 'Regression line'},
+            )
         plt.legend()
 
     def plot_binary_heatmap(
@@ -100,6 +121,7 @@ class CorrelationPlotter:
         self,
         x: pd.Series | np.ndarray,
         y: pd.Series | np.ndarray,
+        save: bool = False,
         ) -> None:
         """Plot the correlation based on the type of dependent variable.
         Args:
@@ -118,12 +140,14 @@ class CorrelationPlotter:
             self.plot_logistic(x, y)
         else:
             self.plot_continuous(x, y)
-        self.__add_meta_to_plot__()
+        self.__add_meta_to_plot__(
+            save=save
+            )
 
     def __check__(
         self,
-        x,
-        y,
+        x: pd.Series | np.ndarray,
+        y: pd.Series | np.ndarray,
         ) -> None:
         """Check the validity of input data for plotting.
         Args:
@@ -154,7 +178,9 @@ class CorrelationPlotter:
             raise ValueError("p_value must be between 0 and 1.")
 
     def __add_meta_to_plot__(
-        self
+        self,
+        save: bool = False,
+        block: bool = False,
         ) -> None:
         """
         Add metadata to the plot, including variable names, coefficients, and p-values.
@@ -175,4 +201,26 @@ class CorrelationPlotter:
         plt.title(f'Logistic correlation: {self.var} vs {self.ref}\n'
                   f'Coef={self.coef:.3f}, p={self.p_value:.3g}')
         plt.tight_layout()
-        plt.show(block=False)
+        if save:
+            var_safe = self._sanitize_filename_part(self.var)
+            ref_safe = self._sanitize_filename_part(self.ref)
+            plt.savefig(
+                f'./plots/{var_safe}_vs_{ref_safe}.png',
+                dpi=300,
+                bbox_inches='tight',
+                )
+        plt.show(block=block)
+
+    def _sanitize_filename_part(
+        self,
+        s: str,
+        ) -> str:
+        """Sanitize a string to be used as a part of a filename.
+        This function replaces any character that is not alphanumeric, underscore, or hyphen
+        with an underscore. It is useful for creating valid filenames from variable names.
+        Args:
+            s (str): The string to sanitize.
+        Returns:
+            str: A sanitized version of the input string suitable for use in filenames.
+        """
+        return re.sub(r'[^\w\-]', '_', s)

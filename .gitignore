@@ -181,3 +181,5 @@ cython_debug/
 
 # result files
 *.json
+*.png
+plots/

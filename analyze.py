@@ -48,7 +48,7 @@ class VariableCorrelationAnalyzer:
     """
     def __init__(
         self,
-        config_path: str
+        config_path: str = 'config.yaml',
         ) -> None:
         """Initializes the VariableCorrelationAnalyzer with configuration settings.
         Args:
@@ -97,7 +97,15 @@ class VariableCorrelationAnalyzer:
         self,
         variables_key: str = 'independent_continuous_variables',
         ) -> None:
-        """Loads the configuration from the YAML file."""
+        """Loads the configuration from the YAML file.
+        Args:
+            variables_key (str): Key in the configuration file that contains
+                                 the list of independent variables.
+        Raises:
+            KeyError: If the specified key is not found in the configuration.
+        Returns:
+            None
+        """
         self.variables = self.config.get(f'{variables_key}', [])
         self.reference_var = self.config.get('reference_var', '')
         if not self.variables or not self.reference_var:
@@ -111,10 +119,11 @@ class VariableCorrelationAnalyzer:
     def pipeline(
         self,
         ) -> None:
-        """ Runs the analysis pipeline: load data and analyze correlations.
+        """
+        Runs the analysis pipeline: load data and analyze correlations.
         This method is a convenience method that calls load_data() and analyze().
         """
-        # self.analyze_continuous()
+        self.analyze_continuous()
         self.analyze_binary()
 
     def load_data(
@@ -158,10 +167,7 @@ class VariableCorrelationAnalyzer:
 
             if self.df[self.reference_var].nunique() == 2:
                 # Logistic regression
-                xx = sm.add_constant(x).values
-                model = sm.Logit(yy, xx).fit(disp=0)
-                coef = model.params[1]
-                p_value = model.pvalues[1]
+                coef, p_value = self._logistic_regression(x, yy)
                 corr_type = 'logistic'
             else:
                 coef, p_value = pearsonr(x, yy)
@@ -184,12 +190,23 @@ class VariableCorrelationAnalyzer:
                 plotter.plot(
                     x=x,
                     y=yy,
+                    save = self.config.get('save_plots', False)
                     )
         # Save results if configured to do so
         if self.config.get('save_results', True):
             self.save_results(
                 variables_key = 'continuous_variables',
                 )
+
+    def _logistic_regression(
+        self,
+        x: pd.Series | np.ndarray,
+        y: pd.Series | np.ndarray,
+        ) -> tuple[float, float]:
+        """Performs logistic regression and returns the coefficient and p-value."""
+        xx = sm.add_constant(x).values
+        model = sm.Logit(y, xx).fit(disp=0)
+        return model.params[1], model.pvalues[1]
 
     def analyze_binary(
         self,
@@ -254,7 +271,11 @@ class VariableCorrelationAnalyzer:
 
             # Optionally plot bar charts
             if p_value < self.config.get('significance_level', 1.0):
-                plotter.plot(x, yy)
+                plotter.plot(
+                    x,
+                    yy,
+                    save = self.config.get('save_plots', False),
+                    )
 
         # Save results if configured to do so
         if self.config.get('save_results', True):
@@ -280,4 +301,9 @@ class VariableCorrelationAnalyzer:
             'w',
             encoding='utf-8'
             ) as f:
-            json.dump(self.result, f, ensure_ascii=False, indent=4)
+            json.dump(
+                self.result,
+                f,
+                ensure_ascii=False,
+                indent=4
+                )

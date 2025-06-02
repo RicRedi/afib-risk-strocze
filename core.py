@@ -44,7 +44,7 @@ def validate_inputs_from_signature(
             raise ValueError(f"Missing required argument: {name}")
 
 def convert_column_to_binary(
-    series: pd.Series
+    series: pd.Series,
     ) -> pd.Series:
     """Converts a pandas Series of textual binary values to a NumPy array of binary integers (0/1).
     The function normalizes string values (trimming whitespace and converting to lowercase)
@@ -65,7 +65,7 @@ def convert_column_to_binary(
 
 def remove_outliers_iqr(
     x: pd.Series,
-    threshold: float = 1.5
+    threshold: float = 1.5,
     ) -> pd.Series:
     """Removes outliers from a pandas Series using the Interquartile Range (IQR) method.
     The function calculates the first (Q1) and third quartiles (Q3) of the data,
@@ -86,7 +86,7 @@ def remove_outliers_iqr(
 
 def remove_outliers_z_score(
     x: pd.Series,
-    threshold: float = 3.0
+    threshold: float = 3.0,
     ) -> pd.Series:
     """Removes outliers from a pandas Series using the Z-score method.
     The function calculates the mean and standard deviation of the data,
