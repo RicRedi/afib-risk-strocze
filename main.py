@@ -19,7 +19,8 @@ Description:
 
 """
 from analyze import VariableCorrelationAnalyzer
+from load_config import load_config_as_object
 
-analyzer = VariableCorrelationAnalyzer("config.yaml")
+config = load_config_as_object('config/config.yaml')
+analyzer = VariableCorrelationAnalyzer(config = config)
 analyzer.pipeline()
-print("done")

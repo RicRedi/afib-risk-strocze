@@ -21,7 +21,6 @@ import json
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-import yaml
 from scipy.stats import pearsonr
 from scipy.stats import chi2_contingency#, fisher_exact
 from statsmodels.stats.contingency_tables import Table2x2
@@ -48,7 +47,7 @@ class VariableCorrelationAnalyzer:
     """
     def __init__(
         self,
-        config_path: str = 'config.yaml',
+        config: object,
         ) -> None:
         """Initializes the VariableCorrelationAnalyzer with configuration settings.
         Args:
@@ -59,13 +58,7 @@ class VariableCorrelationAnalyzer:
         Returns:
             None
         """
-        with open(
-            config_path,
-            'r',
-            encoding='utf-8'
-            ) as f:
-            self.config = yaml.safe_load(f)
-
+        self.config = config
         self.variables = []
         self.reference_var = []
         self.df = None
@@ -86,11 +79,11 @@ class VariableCorrelationAnalyzer:
         """String representation of the VariableCorrelationAnalyzer."""
         return (
             f"VariableCorrelationAnalyzer("
-            f"file_path={self.config['file_path']}, "
+            f"file_path={self.config.file_path}, "
             f"variables={self.variables}, "
             f"reference_var={self.reference_var}, "
-            f"significance_level={self.config.get('significance_level', 1.0)}"
-            f"save_path={self.config['save_path']}"
+            f"significance_level={self.config.significance_level}, "
+            f"save_path={self.config.save_path}"
             )
 
     def __load_attr__(
@@ -106,8 +99,8 @@ class VariableCorrelationAnalyzer:
         Returns:
             None
         """
-        self.variables = self.config.get(f'{variables_key}', [])
-        self.reference_var = self.config.get('reference_var', '')
+        self.variables = getattr(self.config.variables, variables_key, [])
+        self.reference_var = self.config.variables.reference_var
         if not self.variables or not self.reference_var:
             raise KeyError(
                 f"Configuration must contain {variables_key} "
@@ -131,7 +124,7 @@ class VariableCorrelationAnalyzer:
         ) -> None:
         """Loads and filters the Excel file."""
         self.df = pd.read_excel(
-            self.config['file_path'],
+            self.config.file_path,
             usecols=self.variables + [self.reference_var]
         )
 
@@ -186,14 +179,14 @@ class VariableCorrelationAnalyzer:
                 p_value=p_value,
             )
 
-            if p_value < self.config.get('significance_level', 1.0):
+            if p_value < self.config.significance_level:
                 plotter.plot(
                     x=x,
                     y=yy,
-                    save = self.config.get('save_plots', False)
+                    save = self.config.save_plots,
                     )
         # Save results if configured to do so
-        if self.config.get('save_results', True):
+        if self.config.save_results:
             self.save_results(
                 variables_key = 'continuous_variables',
                 )
@@ -270,15 +263,15 @@ class VariableCorrelationAnalyzer:
             }
 
             # Optionally plot bar charts
-            if p_value < self.config.get('significance_level', 1.0):
+            if p_value < self.config.significance_level:
                 plotter.plot(
                     x,
                     yy,
-                    save = self.config.get('save_plots', False),
+                    save = self.config.save_plots,
                     )
 
         # Save results if configured to do so
-        if self.config.get('save_results', True):
+        if self.config.save_results:
             self.save_results(
                 variables_key = 'binary_variables',
                 )
@@ -297,7 +290,7 @@ class VariableCorrelationAnalyzer:
             None
         """
         with open(
-            self.config['save_path'] + f'_{variables_key}_correlations.json',
+            self.config.save_path + f'_{variables_key}_correlations.json',
             'w',
             encoding='utf-8'
             ) as f:
