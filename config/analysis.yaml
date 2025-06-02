@@ -1,0 +1,16 @@
+# File paths
+file_path: ./src/STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136.xlsx
+
+# Cofiguration of analysis pipeline
+iqr_threshold: 1.5
+z_score_threshold: 3.0
+
+# Significance level for statistical tests
+significance_level: 0.05
+
+# Output print settings
+print_output: False
+
+# Output file path for analysis results
+save_results: True
+save_path: ./results

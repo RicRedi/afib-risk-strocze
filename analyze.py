@@ -82,11 +82,11 @@ class VariableCorrelationAnalyzer:
         """String representation of the VariableCorrelationAnalyzer."""
         return (
             f"VariableCorrelationAnalyzer("
-            f"file_path={self.cfg.file_path}, "
+            f"file_path={self.cfg.analysis.file_path}, "
             f"variables={self.variables}, "
             f"reference_var={self.reference_var}, "
-            f"significance_level={self.cfg.significance_level}, "
-            f"save_path={self.cfg.save_path}"
+            f"significance_level={self.cfg.analysis.significance_level}, "
+            f"save_path={self.cfg.analysis.save_path}"
             )
 
     def __load_attr__(
@@ -127,9 +127,9 @@ class VariableCorrelationAnalyzer:
         ) -> None:
         """Loads and filters the Excel file."""
         self.df = pd.read_excel(
-            self.cfg.file_path,
-            usecols=self.variables + [self.reference_var]
-        )
+            self.cfg.analysis.file_path,
+            usecols = self.variables + [self.reference_var]
+            )
 
     def analyze_continuous(
         self,
@@ -148,7 +148,8 @@ class VariableCorrelationAnalyzer:
         y = self.df[self.reference_var].dropna()
 
         for var in self.variables:
-            print(f'Analyzing correlation for variable: {var} vs {self.reference_var}')
+            if self.cfg.analysis.print_progress:
+                print(f'Analyzing correlation for variable: {var} vs {self.reference_var}')
             x = self.df[var].apply(
                 lambda x: np.nan if isinstance(x, str) else x
                 ).replace(
@@ -156,7 +157,10 @@ class VariableCorrelationAnalyzer:
                     np.nan
                     ).dropna()
 
-            x = remove_outliers_iqr(x)
+            x = remove_outliers_iqr(
+                x,
+                threshold=self.cfg.analysis.iqr_threshold,
+                )
             common_idx = x.index.intersection(y.index)
             x = x.loc[common_idx]
             yy = convert_column_to_binary(y.loc[common_idx])
@@ -175,20 +179,17 @@ class VariableCorrelationAnalyzer:
                 'type': corr_type
             }
 
-            plotter = CorrelationPlotter(
+            CorrelationPlotter(
                 var=var,
                 reference_var=self.reference_var,
                 coef=coef,
                 p_value=p_value,
-            )
-
-            if p_value < self.cfg.significance_level:
-                plotter.plot(
+                ).plot(
                     x=x,
                     y=yy,
                     )
         # Save results if configured to do so
-        if self.cfg.save_results:
+        if self.cfg.analysis.save_results:
             self.save_results(
                 variables_key = 'continuous_variables',
                 )
@@ -220,7 +221,8 @@ class VariableCorrelationAnalyzer:
         y = self.df[self.reference_var].dropna()
 
         for var in self.variables:
-            print(f'Analyzing binary association: {var} vs {self.reference_var}')
+            if self.cfg.analysis.print_progress:
+                print(f'Analyzing binary association: {var} vs {self.reference_var}')
             x = self.df[var].apply(
                 lambda x: np.nan if x == 'Nezjištěno' else x
                 ).dropna()
@@ -244,12 +246,15 @@ class VariableCorrelationAnalyzer:
 
             # Chi-squared test
             chi2, p_value, _, _ = chi2_contingency(contingency)
-            plotter = CorrelationPlotter(
+            CorrelationPlotter(
                 var=var,
                 reference_var=self.reference_var,
                 coef=chi2,
                 p_value=p_value,
-            )
+                ).plot(
+                    x,
+                    yy,
+                    )
 
             # Odds ratio + CI
             table = Table2x2(contingency.values)
@@ -264,15 +269,8 @@ class VariableCorrelationAnalyzer:
                 'type': 'binary-association'
             }
 
-            # Optionally plot bar charts
-            if p_value < self.cfg.significance_level:
-                plotter.plot(
-                    x,
-                    yy,
-                    )
-
         # Save results if configured to do so
-        if self.cfg.save_results:
+        if self.cfg.analysis.save_results:
             self.save_results(
                 variables_key = 'binary_variables',
                 )
@@ -291,7 +289,7 @@ class VariableCorrelationAnalyzer:
             None
         """
         with open(
-            self.cfg.save_path + f'/analysis_results_{variables_key}_correlations.json',
+            self.cfg.analysis.save_path + f'/analysis_results_{variables_key}_correlations.json',
             'w',
             encoding='utf-8'
             ) as f:

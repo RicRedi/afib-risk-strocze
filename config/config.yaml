@@ -3,14 +3,12 @@
 # and the reference variable to be used in the analysis.
 # Ensure that the file paths are correct and accessible.
 
-# File paths
-file_path: ./src/STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136.xlsx
-# Output file path for analysis results
-save_results: True
-save_path: ./results
-# Significance level for statistical tests
-significance_level: 1.0
-
+# Configuration file for plotting
 plotting: ./config/plotting.yaml
+
+# Configuration file for analysis
+analysis: ./config/analysis.yaml
+
+# Variables configuration file
 variables: ./config/variables.yaml
   
