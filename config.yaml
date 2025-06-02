@@ -1,10 +1,7 @@
 file_path: .\STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136.xlsx
 
-independent_var:
+independent_continuous_variables:
   - BMI
-  - Kuřák v době vzniku příznaků iCMP/TIA
-  - Abusus alkoholu
-  - Osobní anamnéza (choice=Hyperlipidémie)
   - Časový odstup od iCMP/TIA
   - Rozměr levé síně
   - Enddiastolický rozměr levé komory (LVEDD)
@@ -17,8 +14,13 @@ independent_var:
   - TAG
   - eGFR
   - Sérový kreatinin
-  - SVES - počet záznamů
+  - SVES - počet záznamů 
   - KES - počet záznamů
+
+independent_binar_var:
+  - Kuřák v době vzniku příznaků iCMP/TIA
+  - Abusus alkoholu
+  - Osobní anamnéza (choice=Hyperlipidémie)
 
 reference_var: Záchyt FiS
   

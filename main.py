@@ -27,14 +27,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
 from sklearn.linear_model import LogisticRegression
-from core import validate_inputs_from_signature
+from core import validate_inputs_from_signature, convert_column_to_binary
 
 def analyze_correlations(
     file_path: str = None,
     variables: list = None,
     reference_var: list = None,
-    binary_reference: bool = False,
-    significance_level: float = 0.05
+    significance_level: float = 1.0,
     ) -> None:
     """_summary_
     Args:
@@ -52,29 +51,32 @@ def analyze_correlations(
         usecols = variables + [reference_var],
         )
     results = []
+    y = df[reference_var].dropna()
 
     for var in variables:
-        if var == reference_var:
-            continue
-
-        x = df[var].dropna()
-        y = df[reference_var].dropna()
+        print(f'Analyzing correlation for variable: {var}')
+        
+        x = df[var].apply(
+            lambda x: np.nan if isinstance(x, str) else x
+            ).replace(
+                [np.inf, -np.inf], np.nan
+                ).dropna()
 
         # Align indices
         common_idx = x.index.intersection(y.index)
         x = x.loc[common_idx]
-        y = y.loc[common_idx]
+        yy = convert_column_to_binary(y.loc[common_idx])
 
-        if binary_reference or df[reference_var].nunique() == 2:
+        if df[reference_var].nunique() == 2:
             # Logistic regression
-            xx = sm.add_constant(x)
-            model = sm.Logit(y, xx).fit(disp=0)
+            xx = sm.add_constant(x).values
+            model = sm.Logit(yy, xx).fit(disp=0)
             p_value = model.pvalues[1]
             coef = model.params[1]
             corr_type = 'logistic'
         else:
             # Pearson correlation
-            coef, p_value = pearsonr(x, y)
+            coef, p_value = pearsonr(x, yy)
             corr_type = 'pearson'
 
         results.append({
@@ -90,21 +92,21 @@ def analyze_correlations(
             if corr_type == 'logistic':
                 # Fit logistic regression for plot
                 lr = LogisticRegression()
-                lr.fit(x.values.reshape(-1, 1), y)
+                lr.fit(x.values.reshape(-1, 1), yy)
                 x_plot = np.linspace(x.min(), x.max(), 100)
                 y_prob = lr.predict_proba(x_plot.reshape(-1, 1))[:, 1]
                 plt.plot(x_plot, y_prob, label='Logistic fit')
-                plt.scatter(x, y, alpha=0.5, label='Data')
+                plt.scatter(x, yy, alpha=0.5, label='Data')
                 plt.ylabel(f'{reference_var} (probability)')
             else:
-                sns.regplot(x=x, y=y, logistic=False, ci=None)
+                sns.regplot(x=x, y=yy, logistic=False, ci=None)
                 plt.ylabel(reference_var)
             plt.xlabel(var)
             plt.title(f'{corr_type.capitalize()} correlation: {var} vs {reference_var}\n'
                       f'Coef={coef:.3f}, p={p_value:.3g}')
             plt.legend()
             plt.tight_layout()
-            plt.show()
+            plt.show(block = False)
 
     # Print summary
     print(pd.DataFrame(results))
@@ -114,13 +116,22 @@ def analyze_correlations(
 with open(
     'config.yaml',
     'r',
-    encoding = 'utf-8'
+    encoding = 'utf-8',
     ) as file:
-    config = yaml.safe_load(file)
+    config = yaml.safe_load(
+        file,
+        )
 
 analyze_correlations(
     file_path = config['file_path'],
-    variables = config['independent_var'],
+    variables = config['independent_continuous_variables'],
     reference_var = config['reference_var'],
-    binary_reference = True
 )
+print('Done with continuous variables analysis!')
+# Dodělat......
+# analyze_binary_correlations(
+#     file_path = config['file_path'],
+#     variables = config['independent_binary_variables'],
+#     reference_var = config['reference_var'],
+#     significance_level = 0.05
+# )
