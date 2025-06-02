@@ -15,7 +15,7 @@ GitHub: RicRedi
 _/|_
 
 Description:
-    
+    Script for plotting correlations between variables.
 """
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,7 +40,7 @@ class CorrelationPlotter:
         var: str,
         reference_var: str,
         coef: float,
-        p_value: float
+        p_value: float,
         ) -> None:
         """Initialize the CorrelationPlotter with data and metadata.
         Args:
@@ -93,7 +93,7 @@ class CorrelationPlotter:
     def plot(
         self,
         x: pd.Series | np.ndarray,
-        y: pd.Series | np.ndarray
+        y: pd.Series | np.ndarray,
         ) -> None:
         """Plot the correlation based on the type of dependent variable."""
         # Validate input types and values
