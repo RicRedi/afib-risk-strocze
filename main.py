@@ -20,11 +20,11 @@ Description:
 import torch
 from torch import nn
 from torch import optim
-from torch.utils.data import DataLoader
+# from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score
-from analyze import VariableCorrelationAnalyzer
+# from analyze import VariableCorrelationAnalyzer
 from utils.config_singleton import ConfigSingleton
-from data_loader import TabularDataset
+# from data_loader import TabularDataset
 from splitter import TrainTestSplitter
 from mlp import MLP
 
