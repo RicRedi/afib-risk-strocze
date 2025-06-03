@@ -181,8 +181,8 @@ class VariableCorrelationAnalyzer:
                 coef=coef,
                 p_value=p_value,
                 ).plot(
-                    x=x,
-                    y=yy,
+                    x = x,
+                    y = yy,
                     )
         # Save results if configured to do so
         if self.cfg.analysis.save_results:
