@@ -44,6 +44,17 @@ def validate_inputs_from_signature(
         if param.default is inspect.Parameter.empty and name not in locals_dict:
             raise ValueError(f"Missing required argument: {name}")
 
+def load_data(
+    path: str,
+    variables: list,
+    reference_var: str,
+    ) -> None:
+    """Loads and filters the Excel file."""
+    return pd.read_excel(
+        path,
+        usecols = variables + [reference_var]
+        )
+
 def convert_column_to_binary(
     series: pd.Series,
     ) -> pd.Series:
@@ -63,6 +74,24 @@ def convert_column_to_binary(
         'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1,
         'no': 0, 'n': 0, 'false': 0, '0': 0, 'unchecked': 0, 'ne': 0,
     }).values
+
+def cmp_tia_mapping(
+    x: pd.Series,
+    ) -> pd.Series:
+    """Maps values in a pandas Series to integers based on a provided mapping dictionary.
+    The function replaces each value in the Series with its corresponding integer from the mapping.
+    If a value is not found in the mapping, it is replaced with NaN.
+    
+    Args:
+        x (pd.Series): Input pandas Series containing values to be mapped.
+        
+    Returns:
+        pd.Series: A new pandas Series with values replaced by their corresponding integers
+                   from the mapping.
+    """
+    top_two = x.value_counts().index[:2]
+    mapping = {top_two[0]: 1, top_two[1]: 0}
+    return x.map(mapping)
 
 def remove_outliers_iqr(
     x: pd.Series,

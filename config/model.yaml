@@ -2,16 +2,25 @@
 # This file contains settings for the MLP model used in the analysis.
 # Ensure that the file paths are correct and accessible.
 # Configuration file for MLP model settings
-hyperparameters:
-  input_size: 5         # Number of input features
-  hidden_sizes: [32, 16]
-  output_size: 1
+
+architecture:
+  # list of hidden layer sizes
+  hidden_sizes: 
+    - 3
+    - 2
   dropout: 0.2
-  activation: relu
+  activation: sigmoid
+  output_size: 1
 
 training:
   epochs: 100
-  batch_size: 32
-  lr: 0.001
+  batch_size: 16
+  lr: 0.01
   loss_fn: BCEWithLogitsLoss
   optimizer: Adam
+  shuffle: true
+
+split:
+  test_size: 0.15
+  shuffle: true
+  random_state: 15

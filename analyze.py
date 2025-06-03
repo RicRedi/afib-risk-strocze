@@ -30,8 +30,10 @@ from statsmodels.stats.contingency_tables import Table2x2
 from core import (
     validate_inputs_from_signature,
     convert_column_to_binary,
-    remove_outliers_iqr
-)
+    remove_outliers_iqr,
+    cmp_tia_mapping,
+    load_data
+    )
 from plotting import CorrelationPlotter  # assumes your plotting class is here
 from utils.config_singleton import ConfigSingleton
 
@@ -108,7 +110,11 @@ class VariableCorrelationAnalyzer:
                 f"Configuration must contain {variables_key} "
                 "and 'reference_var'."
             )
-        self.load_data()
+        self.df = load_data(
+            self.cfg.analysis.file_path,
+            self.variables,
+            self.reference_var,
+            )
         self.result = {var: {} for var in self.variables}
 
     def pipeline(
@@ -120,15 +126,6 @@ class VariableCorrelationAnalyzer:
         """
         self.analyze_continuous()
         self.analyze_binary()
-
-    def load_data(
-        self,
-        ) -> None:
-        """Loads and filters the Excel file."""
-        self.df = pd.read_excel(
-            self.cfg.analysis.file_path,
-            usecols = self.variables + [self.reference_var]
-            )
 
     def analyze_continuous(
         self,
@@ -144,7 +141,7 @@ class VariableCorrelationAnalyzer:
         if self.df is None:
             raise ValueError("Data not loaded. Run load_data() first.")
 
-        y = self.df[self.reference_var].dropna()
+        y = cmp_tia_mapping(self.df[self.reference_var]).dropna()
 
         for var in self.variables:
             if self.cfg.analysis.print_progress:
@@ -162,9 +159,9 @@ class VariableCorrelationAnalyzer:
                 )
             common_idx = x.index.intersection(y.index)
             x = x.loc[common_idx]
-            yy = convert_column_to_binary(y.loc[common_idx])
+            yy = y.loc[common_idx].values
 
-            if self.df[self.reference_var].nunique() == 2:
+            if len(np.unique(yy)) == 2:
                 # Logistic regression
                 coef, p_value = self._logistic_regression(x, yy)
                 corr_type = 'logistic'
@@ -190,7 +187,7 @@ class VariableCorrelationAnalyzer:
         # Save results if configured to do so
         if self.cfg.analysis.save_results:
             self.save_results(
-                variables_key = 'continuous_variables',
+                variables_key = 'continuous_variables_cmp_tia_mapping',
                 )
 
     def _logistic_regression(
@@ -217,7 +214,7 @@ class VariableCorrelationAnalyzer:
         if self.df is None:
             raise ValueError("Data not loaded. Run load_data() first.")
 
-        y = self.df[self.reference_var].dropna()
+        y = cmp_tia_mapping(self.df[self.reference_var]).dropna()
 
         for var in self.variables:
             if self.cfg.analysis.print_progress:
@@ -234,7 +231,7 @@ class VariableCorrelationAnalyzer:
             # Align x and y
             common_idx = x.index.intersection(y.index)
             x = convert_column_to_binary(x.loc[common_idx])
-            yy = convert_column_to_binary(y.loc[common_idx])
+            yy = y.loc[common_idx].values
 
             # Contingency table
             contingency = pd.crosstab(x, yy)
@@ -271,7 +268,7 @@ class VariableCorrelationAnalyzer:
         # Save results if configured to do so
         if self.cfg.analysis.save_results:
             self.save_results(
-                variables_key = 'binary_variables',
+                variables_key = 'binary_variables_cmp_tia_mapping',
                 )
 
     def save_results(

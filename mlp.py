@@ -41,25 +41,29 @@ class MLP(nn.Module):
         self,
         ):
         super().__init__()
-        self.cfg = ConfigSingleton.get().model
+        self.cfg = ConfigSingleton.get()
         layers = []
-        in_size = self.cfg.input_size
-        for h in self.cfg.hidden_sizes:
-            layers.append(
-                nn.Linear(
-                    in_size,
-                    h
-                    ))
-            layers.append(
-                ACTIVATIONS[self.cfg.activation]
-                )
-            layers.append(
-                nn.Dropout(self.cfg.dropout)
-                )
-            in_size = h
+        in_size = len(self.cfg.variables.model_features)
+        if self.cfg.model.architecture.hidden_sizes is not None:
+            for h in self.cfg.model.architecture.hidden_sizes:
+                layers.append(
+                    nn.Linear(
+                        in_size,
+                        h
+                        ))
+                layers.append(
+                    ACTIVATIONS[self.cfg.model.architecture.activation]
+                    )
+                layers.append(
+                    nn.Dropout(self.cfg.model.architecture.dropout)
+                    )
+                in_size = h
         layers.append(
-            nn.Linear(in_size, self.cfg.output_size)
+            nn.Linear(in_size, self.cfg.model.architecture.output_size)
             )
+        layers.append(
+                ACTIVATIONS['sigmoid']  # Output layer activation for binary classification
+                )
         self.model = nn.Sequential(*layers)
 
     def forward(

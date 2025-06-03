@@ -17,6 +17,7 @@ independent_continuous_variables:
   - Sérový kreatinin
   - SVES - počet záznamů 
   - KES - počet záznamů
+  - CHA₂DS₂-VASc
 
 # Independent categorical variables
 independent_binary_variables:
@@ -25,4 +26,11 @@ independent_binary_variables:
   - Osobní anamnéza (choice=Hyperlipidémie)
 
 # Independent categorical variables with multiple categories
-reference_var: Záchyt FiS
+# reference_var: Záchyt FiS
+reference_var: Vstupní událost - indikace MDT EKG monitorace
+
+model_features:
+  - CHA₂DS₂-VASc
+  # - Ejekční frakce levé komory (LVEF)
+  # - HDL
+  # - TAG
