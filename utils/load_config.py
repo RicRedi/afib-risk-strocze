@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Created on 02. 06. 2025 at 15:36:22
 

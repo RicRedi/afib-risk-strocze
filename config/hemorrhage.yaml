@@ -1,0 +1,52 @@
+# Configuration file for hemorrhage analysis
+
+# Independent variables to be used in the analysis
+variables:
+  - BMI
+  - Časový odstup od iCMP/TIA
+  - Rozměr levé síně
+  - Enddiastolický rozměr levé komory (LVEDD)
+  - Interventrikulární septum (IVS)
+  - Zadní stěna levé komory (Inferolat.)
+  - Ejekční frakce levé komory (LVEF)
+  - Celkový cholesterol
+  - LDL
+  - HDL
+  - TAG
+  - eGFR
+  - Sérový kreatinin
+  - SVES - počet záznamů 
+  - KES - počet záznamů
+  
+
+reference_var:
+  - CHA₂DS₂-VASc
+  - Antiagregancia (choice=Žádná)
+  - Antikoagulancia (choice=Žádná)
+  - Závažné krvácivé komplikace během léčby (choice=Žádné)
+  - Méně závažné krvácivé komplikace během léčby (choice=Žádné)
+
+conditions:
+  cond1:
+    col: CHA₂DS₂-VASc
+    op: "<="
+    value: 5
+  cond2:
+    col: Antiagregancia (choice=Žádná)
+    op: "=="
+    value: 1
+  cond3:
+    col: Antikoagulancia (choice=Žádná)
+    op: "=="
+    value: 1
+  cond4:
+    col: Závažné krvácivé komplikace během léčby (choice=Žádné)
+    op: "=="
+    value: 1
+  cond5:
+    col: Méně závažné krvácivé komplikace během léčby (choice=Žádné)
+    op: "=="
+    value: 1
+ 
+logic: "cond1 and (cond2 or cond3 or cond4 or cond5)"
+

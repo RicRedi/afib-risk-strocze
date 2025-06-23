@@ -47,12 +47,20 @@ def validate_inputs_from_signature(
 def load_data(
     path: str,
     variables: list,
-    reference_var: str,
+    reference_var: str|list,
     ) -> None:
     """Loads and filters the Excel file."""
+    # if list, usecols = variables + reference_var (list)
+    # if str, usecols = variables + [reference_var]
+    if isinstance(reference_var, str):
+        reference_var = [reference_var]
+    elif not isinstance(reference_var, list):
+        raise TypeError("reference_var must be a string or a list of strings.")
+    if not isinstance(variables, list):
+        raise TypeError("variables must be a list of strings.")
     return pd.read_excel(
         path,
-        usecols = variables + [reference_var]
+        usecols = variables + reference_var
         )
 
 def convert_column_to_binary(
@@ -65,7 +73,6 @@ def convert_column_to_binary(
     
     Args:
         series (pd.Series): Input pandas Series containing textual binary values.
-        np.ndarray: NumPy array of binary integers (0 or 1).
         
     Returns:
         _ (np.ndarray): NumPy array of binary integers (0 or 1).
@@ -134,3 +141,64 @@ def remove_outliers_z_score(
     std_dev = x.std()
     z_scores = (x - mean) / std_dev
     return x[abs(z_scores) <= threshold].reset_index(drop=True)
+
+def make_condition(
+    df: pd.DataFrame,
+    cond: dict
+    ) -> pd.Series:
+    """
+    Creates a boolean mask for a DataFrame based on a condition.
+    The condition is specified as a dictionary with keys 'col', 'op', and 'value'.
+    The 'col' key specifies the column to apply the condition to,
+    the 'op' key specifies the operator (e.g., '==', '!=', '<=', '>=', '<', '>', 'in', 'not in'),
+    and the 'value' key specifies the value to compare against.
+    Args:
+        df (pd.DataFrame): The DataFrame to filter.
+        cond (dict): A dictionary specifying the condition with keys 'col', 'op', and 'value'.      
+    
+    Returns:
+        pd.Series: A boolean Series indicating which rows in the DataFrame satisfy the condition.
+    
+    Raises:     
+        ValueError: If the operator is not supported.
+        """
+    col, op, val = cond.col, cond.op, cond.value
+    if op == '==':
+        return df[col] == val
+    elif op == '!=':
+        return df[col] != val
+    elif op == '<=':
+        return df[col] <= val
+    elif op == '>=':
+        return df[col] >= val
+    elif op == '<':
+        return df[col] < val
+    elif op == '>':
+        return df[col] > val
+    elif op == 'in':
+        return df[col].isin(val)
+    elif op == 'not in':
+        return ~df[col].isin(val)
+    else:
+        raise ValueError(f"Unsupported operator: {op}")
+
+def evaluate_logic(
+    df,
+    conditions: Dict[str, dict],
+    logic: str
+    ) -> pd.Series:
+    """_summary_
+
+    Args:
+        df (_type_): _description_
+        conditions (Dict[str, dict]): _description_
+        logic (str): _description_
+
+    Returns:
+        pd.Series: _description_
+    """
+    local_vars = {
+        name: make_condition(df, cond) \
+            for name, cond in conditions.items()
+        }
+    return eval(logic, {"__builtins__": {}}, local_vars)
