@@ -17,11 +17,10 @@ _/|_
 Description:
     Short description of the script.
 """
-import numpy as np
+# import numpy as np
 from utils.config_singleton import ConfigSingleton
 from core import (
     load_data,
-    make_condition,
     evaluate_logic,
 )
 
@@ -67,11 +66,12 @@ class HemorrhageAnalysis:
         self,
         ) -> None:
         """Mark the hemorrhage variable as suspect."""
-        mask = evaluate_logic(
+        _ = evaluate_logic(
             self.df,
             self.cfg.hemorrhage.conditions,
             self.cfg.hemorrhage.logic,
             )
+        # Po sem to funguje...
 
     def pipeline(
         self

@@ -48,5 +48,5 @@ conditions:
     op: "=="
     value: 1
  
-logic: "cond1 and (cond2 or cond3 or cond4 or cond5)"
+logic: "cond1 & (cond2 | cond3 | cond4 | cond5)"
 

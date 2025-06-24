@@ -21,7 +21,10 @@ Description:
 """
 import inspect
 from typing import Callable, Dict
+import operator
 import pandas as pd
+import pandas.api.types as ptypes
+import numpy as np
 
 def validate_inputs_from_signature(
     func: Callable = None,
@@ -65,7 +68,8 @@ def load_data(
 
 def convert_column_to_binary(
     series: pd.Series,
-    ) -> pd.Series:
+    numpy: bool = True,
+    ) -> pd.Series| np.ndarray:
     """Converts a pandas Series of textual binary values to a NumPy array of binary integers (0/1).
     The function normalizes string values (trimming whitespace and converting to lowercase)
     and maps common binary representations (e.g., 'yes', 'no', 'true', 'false', '1', '0', etc.)
@@ -77,10 +81,16 @@ def convert_column_to_binary(
     Returns:
         _ (np.ndarray): NumPy array of binary integers (0 or 1).
     """
+    if numpy:
+        return series.str.strip().str.lower().map({
+            'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1,
+            'no': 0, 'n': 0, 'false': 0, '0': 0, 'unchecked': 0, 'ne': 0,
+        }).values
+    
     return series.str.strip().str.lower().map({
-        'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1,
-        'no': 0, 'n': 0, 'false': 0, '0': 0, 'unchecked': 0, 'ne': 0,
-    }).values
+            'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1,
+            'no': 0, 'n': 0, 'false': 0, '0': 0, 'unchecked': 0, 'ne': 0,
+        })
 
 def cmp_tia_mapping(
     x: pd.Series,
@@ -163,24 +173,22 @@ def make_condition(
         ValueError: If the operator is not supported.
         """
     col, op, val = cond.col, cond.op, cond.value
-    if op == '==':
-        return df[col] == val
-    elif op == '!=':
-        return df[col] != val
-    elif op == '<=':
-        return df[col] <= val
-    elif op == '>=':
-        return df[col] >= val
-    elif op == '<':
-        return df[col] < val
-    elif op == '>':
-        return df[col] > val
-    elif op == 'in':
-        return df[col].isin(val)
-    elif op == 'not in':
-        return ~df[col].isin(val)
-    else:
-        raise ValueError(f"Unsupported operator: {op}")
+    ops = {
+        '==': operator.eq,
+        '!=': operator.ne,
+        '<=': operator.le,
+        '>=': operator.ge,
+        '<': operator.lt,
+        '>': operator.gt,
+        'in': lambda x, y: x.isin(y),
+        'not in': lambda x, y: ~x.isin(y),
+    }
+    if ptypes.is_string_dtype(df[col]):
+        df[col] = convert_column_to_binary(df[col], numpy=False)
+    try:
+        return ops[op](df[col], val)
+    except KeyError as exc:
+        raise ValueError(f"Unsupported operator: {op}") from exc
 
 def evaluate_logic(
     df,
@@ -197,8 +205,9 @@ def evaluate_logic(
     Returns:
         pd.Series: _description_
     """
+    name_list = list(vars(conditions).keys())
     local_vars = {
-        name: make_condition(df, cond) \
-            for name, cond in conditions.items()
+        name: make_condition(df, getattr(conditions, name)) \
+            for _, name in enumerate(name_list)
         }
     return eval(logic, {"__builtins__": {}}, local_vars)
