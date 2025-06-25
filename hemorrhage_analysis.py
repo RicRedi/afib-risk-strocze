@@ -124,7 +124,7 @@ class HemorrhageAnalysis:
             rounded = True,
             max_depth = self.cfg.hemorrhage.model.max_depth,
         )
-        plt.title("🧠 Decision Tree for Suspect Identification")
+        plt.title("Decision Tree for Suspect Identification")
         plt.tight_layout()
         plt.show()
 
