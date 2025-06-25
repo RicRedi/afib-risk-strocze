@@ -184,9 +184,15 @@ def make_condition(
         'not in': lambda x, y: ~x.isin(y),
     }
     if ptypes.is_string_dtype(df[col]):
-        df[col] = convert_column_to_binary(df[col], numpy=False)
+        df[col] = convert_column_to_binary(
+            df[col],
+            numpy = False,
+            )
     try:
-        return ops[op](df[col], val)
+        return ops[op](
+            df[col],
+            val,
+            )
     except KeyError as exc:
         raise ValueError(f"Unsupported operator: {op}") from exc
 
@@ -210,4 +216,8 @@ def evaluate_logic(
         name: make_condition(df, getattr(conditions, name)) \
             for _, name in enumerate(name_list)
         }
-    return eval(logic, {"__builtins__": {}}, local_vars)
+    return eval(
+        logic,
+        {"__builtins__": {}},
+        {"local_vars": local_vars},
+        )
