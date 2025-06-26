@@ -5,15 +5,15 @@
 # Saving plots settings
 save_plots: True
 save_path: ./results/plots
-
+dpi: 300
 # Show plots in the notebook or script
-show_plots: False
+show_plots: True
 block_plots: False
 
 # Plotting settings
 figsize:
-  width: 10
-  height: 6
+  width: 12
+  height: 8
 
 # Fontsize settings for plots
 fontsize:
@@ -22,3 +22,4 @@ fontsize:
   ylabel: 14
   legend: 12
   tick: 12
+  tree: 10

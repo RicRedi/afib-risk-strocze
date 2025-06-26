@@ -30,7 +30,7 @@ conditions:
   cond1:
     col: CHA₂DS₂-VASc
     op: "<="
-    value: 3
+    value: 4
   cond2:
     col: Antiagregancia (choice=Žádná)
     op: "=="
@@ -43,12 +43,12 @@ conditions:
     col: Závažné krvácivé komplikace během léčby (choice=Žádné)
     op: "=="
     value: 1
-  cond5:
-    col: Méně závažné krvácivé komplikace během léčby (choice=Žádné)
-    op: "=="
-    value: 1
+  # cond5:
+  #   col: Méně závažné krvácivé komplikace během léčby (choice=Žádné)
+  #   op: "=="
+  #   value: 1
  
-logic: "cond1 & (cond2 | cond3 | cond4 | cond5)"
+logic: "cond1 & (cond2 | cond3 | cond4 )"
 
 model:
   max_depth: 5
@@ -56,14 +56,6 @@ model:
   min_samples_leaf: 5
   n_estimators: 100
   random_state: 42
-
-tree_plot:
-  width: 12
-  height: 8
-  fontsize: 10
-  dpi: 600
-  save: true
-  save_path: "./results/plots"
 
 # Output save
 output:

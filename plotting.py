@@ -19,11 +19,13 @@ Description:
 """
 import os
 import re
+from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier, plot_tree
 from utils.config_singleton import ConfigSingleton
 
 class CorrelationPlotter:
@@ -52,13 +54,13 @@ class CorrelationPlotter:
             coef (float): Coefficient from the regression analysis.
             p_value (float): P-value from the regression analysis.
         """
-        self.cfg = ConfigSingleton.get().plotting
+        self.cfg = ConfigSingleton.get()
         self.var = var
         self.ref = reference_var
         self.coef = coef
         self.p_value = p_value
         # make a dir for plots if it does not exist
-        if self.cfg.save_plots:
+        if self.cfg.plotting.save_plots:
             os.makedirs('./results/plots', exist_ok=True)
 
     def plot_logistic(
@@ -109,7 +111,10 @@ class CorrelationPlotter:
         ) -> None:
         """Plot binary bars for binary independent variable."""
         # Create 2x2 contingency table
-        contingency = pd.crosstab(x, y)
+        contingency = pd.crosstab(
+            x,
+            y,
+            )
         # Plot heatmap
         sns.heatmap(
             contingency,
@@ -137,8 +142,8 @@ class CorrelationPlotter:
 
         plt.figure(
             figsize = (
-                self.cfg.figsize.width,
-                self.cfg.figsize.height
+                self.cfg.plotting.figsize.width,
+                self.cfg.plotting.figsize.height
                 )
             )
         if len(np.unique(y)) == 2 and len(np.unique(x)) == 2:
@@ -200,37 +205,37 @@ class CorrelationPlotter:
         This method is typically called after plotting the data to enhance the plot
         """
         plt.xticks(
-            fontsize = self.cfg.fontsize.tick,
+            fontsize = self.cfg.plotting.fontsize.tick,
             )
         plt.yticks(
-            fontsize = self.cfg.fontsize.tick,
+            fontsize = self.cfg.plotting.fontsize.tick,
             )
         plt.ylabel(
             f'{self.ref}',
-            fontsize = self.cfg.fontsize.ylabel,
+            fontsize = self.cfg.plotting.fontsize.ylabel,
             )
         plt.xlabel(
             self.var,
-            fontsize = self.cfg.fontsize.xlabel,
+            fontsize = self.cfg.plotting.fontsize.xlabel,
             )
         plt.title(f'Logistic correlation: {self.var} vs {self.ref}\n'
                   f'Coef={self.coef:.3f}, p={self.p_value:.3g}',
-                  fontsize = self.cfg.fontsize.title,
+                  fontsize = self.cfg.plotting.fontsize.title,
                   )
         plt.tight_layout()
-        if self.cfg.save_plots:
+        if self.cfg.plotting.save_plots:
             var_safe = self._sanitize_filename_part(self.var)
             ref_safe = self._sanitize_filename_part(self.ref)
             try:
                 plt.savefig(
-                    self.cfg.save_path + f'/{var_safe}_vs_{ref_safe}.png',
-                    dpi=300,
-                    bbox_inches='tight',
+                    self.cfg.plotting.save_path + f'/{var_safe}_vs_{ref_safe}.png',
+                    dpi = self.cfg.plotting.dpi,
+                    bbox_inches = 'tight',
                     )
             except OSError as e:
                 print(f"Error saving plot: {e}")
-        if self.cfg.show_plots:
-            plt.show(block = self.cfg.block_plots)
+        if self.cfg.plotting.show_plots:
+            plt.show(block = self.cfg.plotting.block_plots)
 
     def _sanitize_filename_part(
         self,
@@ -246,3 +251,61 @@ class CorrelationPlotter:
             str: A sanitized version of the input string suitable for use in filenames.
         """
         return re.sub(r'[^\w\-]', '_', s)
+
+class DecisionTreePlotter:
+    """
+    Class for plotting decision trees.
+    """
+    def __init__(
+        self,
+        clf: DecisionTreeClassifier,
+        var: str | list[str],
+        reference_var: str | list[str],
+        ) -> None:
+        """Initialize the TreePlotter with a classifier and configuration."""
+        self.clf = clf
+        self.cfg = ConfigSingleton.get()
+        self.var = var
+        self.reference_var = reference_var
+
+    def plot(
+        self,
+        ) -> None:
+        """Plot the decision tree."""
+        plt.figure(
+            figsize = (
+                self.cfg.plotting.figsize.width,
+                self.cfg.plotting.figsize.height,
+                )
+            )
+        plot_tree(
+            self.clf,
+            feature_names = self.var if isinstance(
+                self.var,
+                list
+                ) else [self.var],
+            class_names = self.reference_var if isinstance(
+                self.reference_var,
+                list
+                ) else [self.reference_var],
+            filled = True,
+            rounded = True,
+            max_depth = self.cfg.hemorrhage.model.max_depth,
+            fontsize = self.cfg.plotting.fontsize.tree,
+        )
+        plt.title("Decision Tree for Suspect Identification")
+        plt.tight_layout()
+        if self.cfg.hemorrhage.tree_plot.save:
+            os.makedirs(self.cfg.hemorrhage.tree_plot.save_path, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y_%m_%d_%H%M%S")
+            filename = f"decision_tree_{timestamp}.png"
+            plt.savefig(
+                os.path.join(
+                    self.cfg.hemorrhage.tree_plot.save_path,
+                    filename,
+                ),
+                dpi = self.cfg.hemorrhage.tree_plot.dpi,
+            )
+        else:
+            print("Tree plot will not be saved as per configuration.")
+            plt.show(block = False)

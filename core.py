@@ -131,6 +131,34 @@ def remove_outliers_iqr(
     upper_bound = q3 + threshold * iqr
     return x[(x >= lower_bound) & (x <= upper_bound)].reset_index(drop=True)
 
+def remove_outliers_iqr_df(
+    df: pd.DataFrame,
+    threshold: float = 1.5,
+    ) -> pd.DataFrame:
+    """
+    Removes outlier rows from a DataFrame using the IQR method.
+    A row is removed if any of its values in continuous columns are outside the IQR bounds.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame with continuous numeric columns.
+        threshold (float, optional): Multiplier for IQR to define outliers. Defaults to 1.5.
+
+    Returns:
+        pd.DataFrame: A new DataFrame with outlier rows removed.
+    """
+    mask = pd.Series(True, index=df.index)
+
+    for col in df.columns:
+        if pd.api.types.is_numeric_dtype(df[col]):
+            q1 = df[col].quantile(0.25)
+            q3 = df[col].quantile(0.75)
+            iqr = q3 - q1
+            lower_bound = q1 - threshold * iqr
+            upper_bound = q3 + threshold * iqr
+            mask &= df[col].between(lower_bound, upper_bound)
+
+    return df[mask].reset_index(drop=True)
+
 def remove_outliers_z_score(
     x: pd.Series,
     threshold: float = 3.0,

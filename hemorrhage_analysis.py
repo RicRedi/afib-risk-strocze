@@ -19,13 +19,17 @@ Description:
 """
 import os
 import json
+from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
+import statsmodels.api as sm
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from utils.config_singleton import ConfigSingleton
+from plotting import CorrelationPlotter, DecisionTreePlotter
 from core import (
     load_data,
     evaluate_logic,
+    remove_outliers_iqr_df,
 )
 
 class HemorrhageAnalysis:
@@ -39,8 +43,6 @@ class HemorrhageAnalysis:
         ) -> None:
         """Initialize the HemorrhageAnalysis with configuration settings."""
         self.cfg = ConfigSingleton.get()
-        self.variables = []
-        self.reference_var = None
         self.df = None
         self.result = {}
         self.mask = None
@@ -52,23 +54,17 @@ class HemorrhageAnalysis:
         variables_key: str = "variables",
         ) -> None:
         """Load attributes from the configuration settings."""
-        self.variables = getattr(
-            self.cfg.hemorrhage,
-            variables_key,
-            [],
-            )
-        self.reference_var = self.cfg.hemorrhage.reference_var
-        if not self.variables or not self.reference_var:
+        if not self.cfg.hemorrhage.variables or not self.cfg.hemorrhage.reference_var:
             raise KeyError(
                 f"Configuration must contain {variables_key} "
                 "and 'reference_var'."
             )
         self.df = load_data(
             self.cfg.analysis.file_path,
-            self.variables,
-            self.reference_var,
+            self.cfg.hemorrhage.variables,
+            self.cfg.hemorrhage.reference_var,
             )
-        self.result = {var: {} for var in self.variables}
+        self.result = {var: {} for var in self.cfg.hemorrhage.variables}
     def __make_suspect__(
         self,
         ) -> None:
@@ -85,13 +81,36 @@ class HemorrhageAnalysis:
                 int,
                 ) # Keep series type for consistency with the DataFrame
 
+    def __variable_preprocessing__(
+        self,
+        ) -> np.ndarray:
+        """Preprocess the variables for analysis.
+        This method can include normalization, encoding, or other preprocessing steps
+        as defined in the configuration.
+        """
+        self.x = self.df[self.cfg.hemorrhage.variables]
+        self.x = self.x.map(
+            lambda x: np.nan if isinstance(x, str) else x
+            ).replace(
+                [np.inf, -np.inf],
+                np.nan
+                ).dropna()
+        self.x = remove_outliers_iqr_df(
+                self.x,
+                threshold=self.cfg.analysis.iqr_threshold,
+                )
+        common_idx = self.x.index.intersection(self.mask.index)
+        self.x = self.x.loc[common_idx]
+        yy = self.mask.loc[common_idx]
+        return yy
+
     def analyze_decision_tree(
         self,
         ) -> None:
         """
         Analyze the decision tree for hemorrhage detection.
         """
-        # x = self.df[self.variables]
+        # x = self.df[self.cfg.hemorrhage.variables]
         # y = self.mask
         if self.mask is None:
             raise ValueError("Mask is not defined. Please run __make_suspect__() first.")
@@ -108,19 +127,35 @@ class HemorrhageAnalysis:
         y = self.__variable_preprocessing__()
 
         self.clf.fit(
-            self.x,
-            y,
+            self.x.values,
+            y.values,
             )
 
         # Feature importance using numpy arrays
         importances = np.array(self.clf.feature_importances_)
-        for var in self.variables:
-            self.result[var]["importance"] = importances[self.variables.index(var)]
-        # nonzero_indices = np.where(importances > 0)[0]
-        # sorted_indices = nonzero_indices[np.argsort(importances[nonzero_indices])[::-1]]
+        for var in self.cfg.hemorrhage.variables:
+            self.result[var]["importance"] = importances[self.cfg.hemorrhage.variables.index(var)]
+        nonzero_indices = np.where(importances > 0)[0]
+        sorted_indices = nonzero_indices[np.argsort(importances[nonzero_indices])[::-1]]
+        cms = np.cumsum(importances[sorted_indices])
+        for i, c in enumerate(cms):
+            if c < 0.6:
+                xx = sm.add_constant(
+                    self.x[self.cfg.hemorrhage.variables[sorted_indices[i]]],
+                )
+                model = sm.Logit(y, xx).fit(disp=0)
+                CorrelationPlotter(
+                    var = self.cfg.hemorrhage.variables[sorted_indices[0]],
+                    reference_var = "Suspect",
+                    coef = model.params[1],  # Coefficient for the variable
+                    p_value = model.pvalues[1],  # Placeholder for p-value
+                ).plot(
+                    self.x[self.cfg.hemorrhage.variables[sorted_indices[i]]],
+                    y,
+                )
         # print("Feature importances:")
         # for idx in sorted_indices:
-        #     print(f"{self.variables[idx]}: {importances[idx]}")
+        #     print(f"{self.cfg.hemorrhage.variables[idx]}: {importances[idx]}")
 
         # Vizualizace stromu
         plt.figure(
@@ -131,7 +166,7 @@ class HemorrhageAnalysis:
             )
         plot_tree(
             self.clf,
-            feature_names = self.variables,
+            feature_names = self.cfg.hemorrhage.variables,
             class_names = ["Not Suspect", "Suspect"],
             filled = True,
             rounded = True,
@@ -140,37 +175,7 @@ class HemorrhageAnalysis:
         )
         plt.title("Decision Tree for Suspect Identification")
         plt.tight_layout()
-        if self.cfg.hemorrhage.tree_plot.save:
-            os.makedirs(self.cfg.hemorrhage.tree_plot.save_path, exist_ok=True)
-            plt.savefig(
-                os.path.join(
-                    self.cfg.hemorrhage.tree_plot.save_path,
-                    "decision_tree.png"
-                ),
-                dpi = self.cfg.hemorrhage.tree_plot.dpi,
-            )
-        else:
-            print("Tree plot will not be saved as per configuration.")
-            plt.show(block = False)
-
-    def __variable_preprocessing__(
-        self,
-        ) -> np.ndarray:
-        """Preprocess the variables for analysis.
-        This method can include normalization, encoding, or other preprocessing steps
-        as defined in the configuration.
-        """
-        self.x = self.df[self.variables]
-        self.x = self.x.applymap(
-            lambda x: np.nan if isinstance(x, str) else x
-            ).replace(
-                [np.inf, -np.inf],
-                np.nan
-                ).dropna()
-        common_idx = self.x.index.intersection(self.mask.index)
-        self.x = self.x.loc[common_idx].values
-        yy = self.mask.loc[common_idx].values
-        return yy
+        
 
     def pipeline(
         self
@@ -199,19 +204,22 @@ class HemorrhageAnalysis:
                 ),
             exist_ok = True,
             )
+        timestamp = datetime.now().strftime("%Y_%m_%d_%H%M%S")
+        filename = f"importances_{timestamp}.json"
         with open(
             os.path.join(
-                self.cfg.hemorrhage.output.save_path,
-                "importances.json"
-                ),
+            self.cfg.hemorrhage.output.save_path,
+            filename
+            ),
             'w',
-            encoding =  'utf-8',
-            ) as f:
+            encoding='utf-8',
+        ) as f:
             json.dump(
-                self.result,
-                f,
-                indent = 4,
-                )
+            self.result,
+            f,
+            indent=4,
+            ensure_ascii=False  # Allows non-ASCII characters like French and Czech apostrophes
+            )
 
 # Example usage
 if __name__ == "__main__":
