@@ -17,6 +17,8 @@ _/|_
 Description:
     Short description of the script.
 """
+import os
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.tree import DecisionTreeClassifier, plot_tree
@@ -43,6 +45,7 @@ class HemorrhageAnalysis:
         self.result = {}
         self.mask = None
         self.clf = None
+        self.x = None
 
     def __load_attr___(
         self,
@@ -79,8 +82,8 @@ class HemorrhageAnalysis:
             self.cfg.hemorrhage.conditions,
             self.cfg.hemorrhage.logic,
             ).astype(    # Convert the mask to boolean
-                int
-                ).values # Convert to numpy array for consistency
+                int,
+                ) # Keep series type for consistency with the DataFrame
 
     def analyze_decision_tree(
         self,
@@ -100,22 +103,32 @@ class HemorrhageAnalysis:
             random_state = self.cfg.hemorrhage.model.random_state,
             class_weight = 'balanced',
         )
-        # Need to convert categorical variables to numerical if necessary
+
+        # Preprocess the variables
+        y = self.__variable_preprocessing__()
+
         self.clf.fit(
-            self.df[self.variables],
-            self.mask,
+            self.x,
+            y,
             )
 
         # Feature importance using numpy arrays
         importances = np.array(self.clf.feature_importances_)
-        nonzero_indices = np.where(importances > 0)[0]
-        sorted_indices = nonzero_indices[np.argsort(importances[nonzero_indices])[::-1]]
-        print("Feature importances:")
-        for idx in sorted_indices:
-            print(f"{self.variables[idx]}: {importances[idx]}")
+        for var in self.variables:
+            self.result[var]["importance"] = importances[self.variables.index(var)]
+        # nonzero_indices = np.where(importances > 0)[0]
+        # sorted_indices = nonzero_indices[np.argsort(importances[nonzero_indices])[::-1]]
+        # print("Feature importances:")
+        # for idx in sorted_indices:
+        #     print(f"{self.variables[idx]}: {importances[idx]}")
 
         # Vizualizace stromu
-        plt.figure(figsize=(12, 6))
+        plt.figure(
+            figsize = (
+                self.cfg.hemorrhage.tree_plot.width,
+                self.cfg.hemorrhage.tree_plot.height,
+                )
+            )
         plot_tree(
             self.clf,
             feature_names = self.variables,
@@ -123,30 +136,85 @@ class HemorrhageAnalysis:
             filled = True,
             rounded = True,
             max_depth = self.cfg.hemorrhage.model.max_depth,
+            fontsize = self.cfg.hemorrhage.tree_plot.fontsize,
         )
         plt.title("Decision Tree for Suspect Identification")
         plt.tight_layout()
-        plt.show()
+        if self.cfg.hemorrhage.tree_plot.save:
+            os.makedirs(self.cfg.hemorrhage.tree_plot.save_path, exist_ok=True)
+            plt.savefig(
+                os.path.join(
+                    self.cfg.hemorrhage.tree_plot.save_path,
+                    "decision_tree.png"
+                ),
+                dpi = self.cfg.hemorrhage.tree_plot.dpi,
+            )
+        else:
+            print("Tree plot will not be saved as per configuration.")
+            plt.show(block = False)
 
+    def __variable_preprocessing__(
+        self,
+        ) -> np.ndarray:
+        """Preprocess the variables for analysis.
+        This method can include normalization, encoding, or other preprocessing steps
+        as defined in the configuration.
+        """
+        self.x = self.df[self.variables]
+        self.x = self.x.applymap(
+            lambda x: np.nan if isinstance(x, str) else x
+            ).replace(
+                [np.inf, -np.inf],
+                np.nan
+                ).dropna()
+        common_idx = self.x.index.intersection(self.mask.index)
+        self.x = self.x.loc[common_idx].values
+        yy = self.mask.loc[common_idx].values
+        return yy
 
     def pipeline(
         self
         ) -> None:
-        """_summary_
+        """
+        Run the analysis pipeline for hemorrhage detection.
+        This method orchestrates the loading of attributes, making the suspect variable,
+        and analyzing the decision tree.
+        It prints a message indicating that the analysis is complete
+        and results are ready for saving.
         """
         self.__load_attr___()
         self.__make_suspect__()
         self.analyze_decision_tree()
+        if self.cfg.hemorrhage.output.save:
+            self.save_results()
 
     def save_results(
         self
         ) -> None:
         """Save the results of the hemorrhage analysis."""
-
+        # save results as a json file
+        os.makedirs(
+            os.path.dirname(
+                self.cfg.hemorrhage.output.save_path,
+                ),
+            exist_ok = True,
+            )
+        with open(
+            os.path.join(
+                self.cfg.hemorrhage.output.save_path,
+                "importances.json"
+                ),
+            'w',
+            encoding =  'utf-8',
+            ) as f:
+            json.dump(
+                self.result,
+                f,
+                indent = 4,
+                )
 
 # Example usage
 if __name__ == "__main__":
     ConfigSingleton.set()
     analysis = HemorrhageAnalysis()
     analysis.pipeline()
-    analysis.save_results()

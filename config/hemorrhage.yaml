@@ -30,7 +30,7 @@ conditions:
   cond1:
     col: CHA₂DS₂-VASc
     op: "<="
-    value: 4
+    value: 3
   cond2:
     col: Antiagregancia (choice=Žádná)
     op: "=="
@@ -56,3 +56,17 @@ model:
   min_samples_leaf: 5
   n_estimators: 100
   random_state: 42
+
+tree_plot:
+  width: 12
+  height: 8
+  fontsize: 10
+  dpi: 600
+  save: true
+  save_path: "./results/plots"
+
+# Output save
+output:
+  save: true
+  save_path: "./results"
+  file_format: "json"

@@ -219,5 +219,5 @@ def evaluate_logic(
     return eval(
         logic,
         {"__builtins__": {}},
-        {"local_vars": local_vars},
+        local_vars,
         )
