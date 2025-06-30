@@ -118,10 +118,10 @@ class CorrelationPlotter:
         # Plot heatmap
         sns.heatmap(
             contingency,
-            annot=True,
-            fmt='d',
-            cmap='Blues',
-            cbar=False
+            annot = True,
+            fmt = 'd',
+            cmap = 'Blues',
+            cbar = False
         )
 
     def plot(
@@ -219,7 +219,7 @@ class CorrelationPlotter:
             fontsize = self.cfg.plotting.fontsize.xlabel,
             )
         plt.title(f'Logistic correlation: {self.var} vs {self.ref}\n'
-                  f'Coef={self.coef:.3f}, p={self.p_value:.3g}',
+                  f'Coef = {self.coef:.3f}, p = {self.p_value:.3g}',
                   fontsize = self.cfg.plotting.fontsize.title,
                   )
         plt.tight_layout()

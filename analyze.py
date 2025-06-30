@@ -64,7 +64,6 @@ class VariableCorrelationAnalyzer:
         """
         self.cfg = ConfigSingleton.get()
         self.variables = []
-        self.reference_var = []
         self.df = None
         self.result = {}
 
@@ -73,7 +72,6 @@ class VariableCorrelationAnalyzer:
         ) -> None:
         """Resets the analyzer's state by clearing the DataFrame and results."""
         self.variables = []
-        self.reference_var = ''
         self.df = None
         self.result = {}
 
@@ -85,7 +83,7 @@ class VariableCorrelationAnalyzer:
             f"VariableCorrelationAnalyzer("
             f"file_path={self.cfg.analysis.file_path}, "
             f"variables={self.variables}, "
-            f"reference_var={self.reference_var}, "
+            f"reference_var={self.cfg.variables.reference_var}, "
             f"significance_level={self.cfg.analysis.significance_level}, "
             f"save_path={self.cfg.analysis.save_path}"
             )
@@ -104,8 +102,8 @@ class VariableCorrelationAnalyzer:
             None
         """
         self.variables = getattr(self.cfg.variables, variables_key, [])
-        self.reference_var = self.cfg.variables.reference_var
-        if not self.variables or not self.reference_var:
+        # self.reference_var = self.cfg.variables.reference_var
+        if not self.variables or not self.cfg.variables.reference_var:
             raise KeyError(
                 f"Configuration must contain {variables_key} "
                 "and 'reference_var'."
@@ -113,7 +111,7 @@ class VariableCorrelationAnalyzer:
         self.df = load_data(
             self.cfg.analysis.file_path,
             self.variables,
-            self.reference_var,
+            self.cfg.variables.reference_var,
             )
         self.result = {var: {} for var in self.variables}
 
@@ -141,11 +139,11 @@ class VariableCorrelationAnalyzer:
         if self.df is None:
             raise ValueError("Data not loaded. Run load_data() first.")
 
-        y = cmp_tia_mapping(self.df[self.reference_var]).dropna()
+        y = cmp_tia_mapping(self.df[self.cfg.variables.reference_var]).dropna()
 
         for var in self.variables:
             if self.cfg.analysis.print_progress:
-                print(f'Analyzing correlation for variable: {var} vs {self.reference_var}')
+                print(f'Analyzing correlation for variable: {var} vs {self.cfg.variables.reference_var}')
             x = self.df[var].apply(
                 lambda x: np.nan if isinstance(x, str) else x
                 ).replace(
@@ -172,12 +170,13 @@ class VariableCorrelationAnalyzer:
             self.result[var] = {
                 'correlation': coef,
                 'p_value': p_value,
-                'type': corr_type
+                'type': corr_type,
+                'data used [%]': np.round(len(x) / len(self.df[var]) * 100, 2),
             }
 
             CorrelationPlotter(
                 var=var,
-                reference_var=self.reference_var,
+                reference_var=self.cfg.variables.reference_var,
                 coef=coef,
                 p_value=p_value,
                 ).plot(
@@ -214,11 +213,11 @@ class VariableCorrelationAnalyzer:
         if self.df is None:
             raise ValueError("Data not loaded. Run load_data() first.")
 
-        y = cmp_tia_mapping(self.df[self.reference_var]).dropna()
+        y = cmp_tia_mapping(self.df[self.cfg.variables.reference_var]).dropna()
 
         for var in self.variables:
             if self.cfg.analysis.print_progress:
-                print(f'Analyzing binary association: {var} vs {self.reference_var}')
+                print(f'Analyzing binary association: {var} vs {self.cfg.variables.reference_var}')
             x = self.df[var].apply(
                 lambda x: np.nan if x == 'Nezjištěno' else x
                 ).dropna()
@@ -243,10 +242,10 @@ class VariableCorrelationAnalyzer:
             # Chi-squared test
             chi2, p_value, _, _ = chi2_contingency(contingency)
             CorrelationPlotter(
-                var=var,
-                reference_var=self.reference_var,
-                coef=chi2,
-                p_value=p_value,
+                var = var,
+                reference_var = self.cfg.variables.reference_var,
+                coef = chi2,
+                p_value = p_value,
                 ).plot(
                     x,
                     yy,
@@ -262,7 +261,8 @@ class VariableCorrelationAnalyzer:
                 'odds_ratio': odds_ratio,
                 'odds_CI_lower': confint[0],
                 'odds_CI_upper': confint[1],
-                'type': 'binary-association'
+                'type': 'binary-association',
+                'data used [%]': np.round(len(x) / len(self.df[var]) * 100, 2),
             }
 
         # Save results if configured to do so

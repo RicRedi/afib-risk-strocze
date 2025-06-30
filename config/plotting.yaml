@@ -7,7 +7,7 @@ save_plots: True
 save_path: ./results/plots
 dpi: 300
 # Show plots in the notebook or script
-show_plots: True
+show_plots: False
 block_plots: False
 
 # Plotting settings

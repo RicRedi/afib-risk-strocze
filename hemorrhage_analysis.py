@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from utils.config_singleton import ConfigSingleton
-from plotting import CorrelationPlotter, DecisionTreePlotter
+from plotting import CorrelationPlotter#, DecisionTreePlotter
 from core import (
     load_data,
     evaluate_logic,
@@ -97,7 +97,7 @@ class HemorrhageAnalysis:
                 ).dropna()
         self.x = remove_outliers_iqr_df(
                 self.x,
-                threshold=self.cfg.analysis.iqr_threshold,
+                threshold = self.cfg.analysis.iqr_threshold,
                 )
         common_idx = self.x.index.intersection(self.mask.index)
         self.x = self.x.loc[common_idx]
@@ -212,13 +212,13 @@ class HemorrhageAnalysis:
             filename
             ),
             'w',
-            encoding='utf-8',
+            encoding = 'utf-8',
         ) as f:
             json.dump(
             self.result,
             f,
-            indent=4,
-            ensure_ascii=False  # Allows non-ASCII characters like French and Czech apostrophes
+            indent = 4,
+            ensure_ascii = False  # Allows non-ASCII characters like French and Czech apostrophes
             )
 
 # Example usage
