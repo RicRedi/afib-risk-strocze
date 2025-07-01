@@ -175,7 +175,7 @@ class HemorrhageAnalysis:
         )
         plt.title("Decision Tree for Suspect Identification")
         plt.tight_layout()
-        
+
 
     def pipeline(
         self

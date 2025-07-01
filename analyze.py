@@ -32,7 +32,8 @@ from core import (
     convert_column_to_binary,
     remove_outliers_iqr,
     cmp_tia_mapping,
-    load_data
+    load_data,
+    evaluate_logic,
     )
 from plotting import CorrelationPlotter  # assumes your plotting class is here
 from utils.config_singleton import ConfigSingleton
@@ -81,11 +82,11 @@ class VariableCorrelationAnalyzer:
         """String representation of the VariableCorrelationAnalyzer."""
         return (
             f"VariableCorrelationAnalyzer("
-            f"file_path={self.cfg.analysis.file_path}, "
-            f"variables={self.variables}, "
-            f"reference_var={self.cfg.variables.reference_var}, "
-            f"significance_level={self.cfg.analysis.significance_level}, "
-            f"save_path={self.cfg.analysis.save_path}"
+            f"file_path = {self.cfg.analysis.file_path}, "
+            f"variables = {self.variables}, "
+            f"reference_var = {self.cfg.variables.reference_var}, "
+            f"significance_level = {self.cfg.analysis.significance_level}, "
+            f"save_path = {self.cfg.analysis.save_path}"
             )
 
     def __load_attr__(
@@ -101,7 +102,8 @@ class VariableCorrelationAnalyzer:
         Returns:
             None
         """
-        self.variables = getattr(self.cfg.variables, variables_key, [])
+        self.variables = self.cfg.hemorrhage.variables
+        #        getattr(self.cfg.variables, variables_key, [])
         # self.reference_var = self.cfg.variables.reference_var
         if not self.variables or not self.cfg.variables.reference_var:
             raise KeyError(
@@ -110,8 +112,10 @@ class VariableCorrelationAnalyzer:
             )
         self.df = load_data(
             self.cfg.analysis.file_path,
-            self.variables,
-            self.cfg.variables.reference_var,
+            # self.variables,
+            # self.cfg.variables.reference_var,
+            self.cfg.hemorrhage.variables,
+            self.cfg.hemorrhage.reference_var,
             )
         self.result = {var: {} for var in self.variables}
 
@@ -139,11 +143,23 @@ class VariableCorrelationAnalyzer:
         if self.df is None:
             raise ValueError("Data not loaded. Run load_data() first.")
 
-        y = cmp_tia_mapping(self.df[self.cfg.variables.reference_var]).dropna()
+        # y = cmp_tia_mapping(
+        #     self.df[self.cfg.variables.reference_var],
+        #     ).dropna()
+
+        y = evaluate_logic(
+            self.df,
+            self.cfg.hemorrhage.conditions,
+            self.cfg.hemorrhage.logic,
+            ).astype(    # Convert the mask to boolean
+                int,
+                )
 
         for var in self.variables:
             if self.cfg.analysis.print_progress:
-                print(f'Analyzing correlation for variable: {var} vs {self.cfg.variables.reference_var}')
+                print(
+                    f'Analyzing correlation for: {var} vs {self.cfg.variables.reference_var}'
+                    )
             x = self.df[var].apply(
                 lambda x: np.nan if isinstance(x, str) else x
                 ).replace(
@@ -153,7 +169,7 @@ class VariableCorrelationAnalyzer:
 
             x = remove_outliers_iqr(
                 x,
-                threshold=self.cfg.analysis.iqr_threshold,
+                threshold = self.cfg.analysis.iqr_threshold,
                 )
             common_idx = x.index.intersection(y.index)
             x = x.loc[common_idx]
@@ -175,10 +191,10 @@ class VariableCorrelationAnalyzer:
             }
 
             CorrelationPlotter(
-                var=var,
-                reference_var=self.cfg.variables.reference_var,
-                coef=coef,
-                p_value=p_value,
+                var = var,
+                reference_var = self.cfg.variables.reference_var,
+                coef = coef,
+                p_value = p_value,
                 ).plot(
                     x = x,
                     y = yy,
@@ -208,7 +224,7 @@ class VariableCorrelationAnalyzer:
         })
         self.__reset__()
         self.__load_attr__(
-            variables_key='independent_binary_variables'
+            variables_key = 'independent_binary_variables'
             )
         if self.df is None:
             raise ValueError("Data not loaded. Run load_data() first.")
@@ -285,13 +301,20 @@ class VariableCorrelationAnalyzer:
             None
         """
         with open(
-            self.cfg.analysis.save_path + f'/analysis_results_{variables_key}_correlations.json',
+            self.cfg.analysis.save_path + \
+                f'/analysis_results_{variables_key}_correlations_hemorrhage.json',
             'w',
-            encoding='utf-8'
+            encoding = 'utf-8'
             ) as f:
             json.dump(
                 self.result,
                 f,
-                ensure_ascii=False,
-                indent=4
+                ensure_ascii = False,
+                indent = 4
                 )
+
+# Example usage:
+# if __name__ == "__main__":
+#     analyzer = VariableCorrelationAnalyzer()
+#     analyzer.pipeline()
+        
