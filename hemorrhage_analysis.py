@@ -93,7 +93,7 @@ class HemorrhageAnalysis:
             lambda x: np.nan if isinstance(x, str) else x
             ).replace(
                 [np.inf, -np.inf],
-                np.nan
+                np.nan,
                 ).dropna()
         self.x = remove_outliers_iqr_df(
                 self.x,
@@ -132,12 +132,22 @@ class HemorrhageAnalysis:
             )
 
         # Feature importance using numpy arrays
-        importances = np.array(self.clf.feature_importances_)
+        importances = np.array(
+            self.clf.feature_importances_,
+            )
         for var in self.cfg.hemorrhage.variables:
-            self.result[var]["importance"] = importances[self.cfg.hemorrhage.variables.index(var)]
-        nonzero_indices = np.where(importances > 0)[0]
-        sorted_indices = nonzero_indices[np.argsort(importances[nonzero_indices])[::-1]]
-        cms = np.cumsum(importances[sorted_indices])
+            self.result[var]["importance"] = importances[
+                                                self.cfg.hemorrhage.variables.index(var)
+                                                ]
+        nonzero_indices = np.where(
+            importances > 0,
+            )[0]
+        sorted_indices = nonzero_indices[np.argsort(
+                                            importances[nonzero_indices],
+                                            )[::-1]]
+        cms = np.cumsum(
+            importances[sorted_indices]
+            )
         for i, c in enumerate(cms):
             if c < 0.6:
                 xx = sm.add_constant(

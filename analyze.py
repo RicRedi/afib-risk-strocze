@@ -31,12 +31,12 @@ from core import (
     validate_inputs_from_signature,
     convert_column_to_binary,
     remove_outliers_iqr,
-    cmp_tia_mapping,
     load_data,
     evaluate_logic,
     )
 from plotting import CorrelationPlotter  # assumes your plotting class is here
 from utils.config_singleton import ConfigSingleton
+from scipy.stats import ttest_ind, levene
 
 class VariableCorrelationAnalyzer:
     """
@@ -175,19 +175,55 @@ class VariableCorrelationAnalyzer:
             x = x.loc[common_idx]
             yy = y.loc[common_idx].values
 
-            if len(np.unique(yy)) == 2:
+            if len(
+                np.unique(yy)
+                ) == 2:
                 # Logistic regression
-                coef, p_value = self._logistic_regression(x, yy)
+                coef, p_value = self._logistic_regression(
+                    x,
+                    yy
+                    )
                 corr_type = 'logistic'
+                # check equality of variance
+
+                # Split x by binary outcome
+                group0 = x[yy == 0]
+                group1 = x[yy == 1]
+
+                # Check if both groups have enough samples
+                if len(group0) > 1 and len(group1) > 1:
+                    # Test for equality of variances
+                    _, p_var = levene(
+                        group0,
+                        group1,
+                        )
+                    equal_var = p_var > 0.05
+
+                    # t-test with appropriate variance setting
+                    t_stat, t_p_value = ttest_ind(
+                        group0,
+                        group1,
+                        equal_var = equal_var,
+                        nan_policy = 'omit'
+                        )
+                else:
+                    t_stat, t_p_value, p_var = np.nan, np.nan, np.nan
             else:
-                coef, p_value = pearsonr(x, yy)
+                coef, p_value = pearsonr(
+                    x,
+                    yy,
+                    )
                 corr_type = 'pearson'
+                t_stat, t_p_value, p_var = np.nan, np.nan, np.nan
+
 
             self.result[var] = {
                 'correlation': coef,
                 'p_value': p_value,
                 'type': corr_type,
                 'data used [%]': np.round(len(x) / len(self.df[var]) * 100, 2),
+                't_statistic': t_stat,
+                't_p_value': t_p_value,
             }
 
             CorrelationPlotter(
@@ -229,7 +265,17 @@ class VariableCorrelationAnalyzer:
         if self.df is None:
             raise ValueError("Data not loaded. Run load_data() first.")
 
-        y = cmp_tia_mapping(self.df[self.cfg.variables.reference_var]).dropna()
+        # y = cmp_tia_mapping(
+        #     self.df[self.cfg.variables.reference_var]
+        #     ).dropna()
+
+        y = evaluate_logic(
+            self.df,
+            self.cfg.hemorrhage.conditions,
+            self.cfg.hemorrhage.logic,
+            ).astype(    # Convert the mask to boolean
+                int,
+                )
 
         for var in self.variables:
             if self.cfg.analysis.print_progress:
@@ -317,4 +363,3 @@ class VariableCorrelationAnalyzer:
 # if __name__ == "__main__":
 #     analyzer = VariableCorrelationAnalyzer()
 #     analyzer.pipeline()
-        
