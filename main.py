@@ -18,9 +18,12 @@ Description:
     Correlations Analysis
 """
 from analyze import VariableCorrelationAnalyzer
-#from hemorrhage_analysis import HemorrhageAnalysis
+from hemorrhage_analysis import HemorrhageAnalysis
 from utils.config_singleton import ConfigSingleton
 
+i = 0
 ConfigSingleton.set()
-VariableCorrelationAnalyzer().pipeline()
-# HemorrhageAnalysis().pipeline()
+if i == 1:
+    VariableCorrelationAnalyzer().pipeline()
+else:
+    HemorrhageAnalysis().pipeline()

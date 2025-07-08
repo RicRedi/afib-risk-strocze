@@ -44,14 +44,27 @@ class ConfigObject:
             elif (
                 isinstance(value, str) and
                 value.endswith(('.yaml', '.yml')) and
-                os.path.exists(os.path.join(base_path or '', value))
+                os.path.exists(
+                    os.path.join(base_path or '', value)
+                    )
                 ):
                 # Load nested config file
                 nested_path = os.path.join(base_path or '', value)
-                with open(nested_path, 'r', encoding='utf-8') as f:
+                with open(
+                    nested_path,
+                    'r',
+                    encoding = 'utf-8'
+                    ) as f:
                     nested_data = yaml.safe_load(f)
-                value = ConfigObject(nested_data, base_path=os.path.dirname(nested_path))
-            setattr(self, key, value)
+                value = ConfigObject(
+                    nested_data,
+                    base_path = os.path.dirname(nested_path)
+                    )
+            setattr(
+                self,
+                key,
+                value,
+                )
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.__dict__})"
@@ -76,3 +89,29 @@ def load_config_as_object(
         ) as file:
         config_dict = yaml.safe_load(file)
     return ConfigObject(config_dict)
+
+def save_config_as_yaml(
+    config: ConfigObject,
+    path: str
+    ) -> None:
+    """
+    Save a ConfigObject to a YAML file.
+    Args:
+        config (ConfigObject): The configuration object to save.
+        path (str): The path where the YAML file will be saved.
+    Raises:
+        TypeError: If the config is not an instance of ConfigObject.
+    """
+    if not isinstance(config, ConfigObject):
+        raise TypeError("config must be an instance of ConfigObject")
+    with open(
+        path,
+        'w',
+        encoding='utf-8',
+        ) as file:
+        yaml.dump(
+            config.__dict__,
+            file,
+            default_flow_style = False,
+            allow_unicode = True,
+            )

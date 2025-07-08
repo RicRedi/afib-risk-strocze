@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 """
 Created on 23. 06. 2025 at 10:33:54
 
@@ -15,7 +16,13 @@ GitHub: RicRedi
 _/|_
 
 Description:
-    Short description of the script.
+    This script provides a class-based pipeline for analyzing hemorrhage data
+    using decision tree classification.
+    It loads data, applies configurable logic to identify suspect cases,
+    preprocesses variables, fits a decision tree,
+    evaluates feature importances, and optionally saves the results.
+    Visualization of the decision tree and variable
+    correlations is also supported.
 """
 import os
 import json
@@ -89,6 +96,9 @@ class HemorrhageAnalysis:
         as defined in the configuration.
         """
         self.x = self.df[self.cfg.hemorrhage.variables]
+        # Remove columns with more than 50 % missing values
+        self.x = self.x.loc[:, self.x.isna().mean() < 0.5]
+        # Remove rows with any missing values
         self.x = self.x.map(
             lambda x: np.nan if isinstance(x, str) else x
             ).replace(
@@ -113,7 +123,9 @@ class HemorrhageAnalysis:
         # x = self.df[self.cfg.hemorrhage.variables]
         # y = self.mask
         if self.mask is None:
-            raise ValueError("Mask is not defined. Please run __make_suspect__() first.")
+            raise ValueError(
+                "Mask is not defined. Please run __make_suspect__() first."
+                )
 
         self.clf = DecisionTreeClassifier(
             max_depth = self.cfg.hemorrhage.model.max_depth,
@@ -135,32 +147,41 @@ class HemorrhageAnalysis:
         importances = np.array(
             self.clf.feature_importances_,
             )
-        for var in self.cfg.hemorrhage.variables:
-            self.result[var]["importance"] = importances[
-                                                self.cfg.hemorrhage.variables.index(var)
-                                                ]
+        i = 0
+        for _, var in enumerate(self.cfg.hemorrhage.variables):
+            if var not in self.x.columns:
+                self.result[var]["importance"] = "removed for more than 50% missing values"
+            else:
+                self.result[var]["importance"] = importances[i]
+                i += 1
         nonzero_indices = np.where(
             importances > 0,
             )[0]
-        sorted_indices = nonzero_indices[np.argsort(
-                                            importances[nonzero_indices],
-                                            )[::-1]]
+        sorted_indices = nonzero_indices[
+            np.argsort(
+                importances[nonzero_indices],
+                )[::-1]]
         cms = np.cumsum(
             importances[sorted_indices]
             )
         for i, c in enumerate(cms):
             if c < 0.6:
                 xx = sm.add_constant(
-                    self.x[self.cfg.hemorrhage.variables[sorted_indices[i]]],
+                    self.x[self.x.columns[sorted_indices[i]]],
                 )
-                model = sm.Logit(y, xx).fit(disp=0)
+                model = sm.Logit(
+                    y,
+                    xx
+                    ).fit(
+                        disp=0
+                        )
                 CorrelationPlotter(
-                    var = self.cfg.hemorrhage.variables[sorted_indices[0]],
+                    var = self.x.columns[sorted_indices[0]],
                     reference_var = "Suspect",
                     coef = model.params[1],  # Coefficient for the variable
                     p_value = model.pvalues[1],  # Placeholder for p-value
                 ).plot(
-                    self.x[self.cfg.hemorrhage.variables[sorted_indices[i]]],
+                    self.x[self.x.columns[sorted_indices[i]]],
                     y,
                 )
         # print("Feature importances:")
@@ -170,18 +191,18 @@ class HemorrhageAnalysis:
         # Vizualizace stromu
         plt.figure(
             figsize = (
-                self.cfg.hemorrhage.tree_plot.width,
-                self.cfg.hemorrhage.tree_plot.height,
+                self.cfg.plotting.figsize.width,
+                self.cfg.plotting.figsize.height,
                 )
             )
         plot_tree(
             self.clf,
-            feature_names = self.cfg.hemorrhage.variables,
+            feature_names = self.x.columns.tolist(),
             class_names = ["Not Suspect", "Suspect"],
             filled = True,
             rounded = True,
             max_depth = self.cfg.hemorrhage.model.max_depth,
-            fontsize = self.cfg.hemorrhage.tree_plot.fontsize,
+            fontsize = self.cfg.plotting.fontsize.tree,
         )
         plt.title("Decision Tree for Suspect Identification")
         plt.tight_layout()
@@ -218,18 +239,18 @@ class HemorrhageAnalysis:
         filename = f"importances_{timestamp}.json"
         with open(
             os.path.join(
-            self.cfg.hemorrhage.output.save_path,
-            filename
-            ),
+                self.cfg.hemorrhage.output.save_path,
+                filename
+                ),
             'w',
             encoding = 'utf-8',
         ) as f:
             json.dump(
-            self.result,
-            f,
-            indent = 4,
-            ensure_ascii = False  # Allows non-ASCII characters like French and Czech apostrophes
-            )
+                self.result,
+                f,
+                indent = 4,
+                ensure_ascii = False  # Allows non-ASCII characters
+                )
 
 # Example usage
 if __name__ == "__main__":

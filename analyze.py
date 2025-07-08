@@ -24,7 +24,7 @@ import json
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, ttest_ind, levene
 from scipy.stats import chi2_contingency#, fisher_exact
 from statsmodels.stats.contingency_tables import Table2x2
 from core import (
@@ -36,7 +36,7 @@ from core import (
     )
 from plotting import CorrelationPlotter  # assumes your plotting class is here
 from utils.config_singleton import ConfigSingleton
-from scipy.stats import ttest_ind, levene
+
 
 class VariableCorrelationAnalyzer:
     """
