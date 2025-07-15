@@ -3,20 +3,20 @@
 # Independent variables to be used in the analysis
 variables:
   - BMI
-  - Časový odstup od iCMP/TIA
-  - Rozměr levé síně
-  - Enddiastolický rozměr levé komory (LVEDD)
-  - Interventrikulární septum (IVS)
-  - Zadní stěna levé komory (Inferolat.)
-  - Ejekční frakce levé komory (LVEF)
-  - Celkový cholesterol
+  # - Časový odstup od iCMP/TIA
+  # - Rozměr levé síně
+  # - Enddiastolický rozměr levé komory (LVEDD)
+  # - Interventrikulární septum (IVS)
+  # - Zadní stěna levé komory (Inferolat.)
+  # - Ejekční frakce levé komory (LVEF)
+  # - Celkový cholesterol
   - LDL
-  - HDL
-  - TAG
-  - eGFR
-  - Sérový kreatinin
-  - SVES - počet záznamů 
-  - KES - počet záznamů
+  # - HDL
+  # - TAG
+  # - eGFR
+  # - Sérový kreatinin
+  # - SVES - počet záznamů 
+  # - KES - počet záznamů
   
 
 reference_var:
@@ -27,10 +27,10 @@ reference_var:
   - Méně závažné krvácivé komplikace během léčby (choice=Žádné)
 
 conditions:
-  cond1:
-    col: CHA₂DS₂-VASc
-    op: "<="
-    value: 4
+  # cond1:
+  #   col: CHA₂DS₂-VASc
+  #   op: "<="
+  #   value: 4
   cond2:
     col: Antiagregancia (choice=Žádná)
     op: "=="
@@ -42,18 +42,19 @@ conditions:
   cond4:
     col: Závažné krvácivé komplikace během léčby (choice=Žádné)
     op: "=="
-    value: 1
-  # cond5:
-  #   col: Méně závažné krvácivé komplikace během léčby (choice=Žádné)
-  #   op: "=="
-  #   value: 1
+    value: 0
+  cond5:
+    col: Méně závažné krvácivé komplikace během léčby (choice=Žádné)
+    op: "=="
+    value: 0
  
-logic: "cond1 & (cond2 | cond3 | cond4 )"
+logic: "(cond2 | cond3) & cond4 & cond5"
+# "cond1 & (cond2 | cond3 | cond4 )"
 
 model:
-  max_depth: 5
-  min_samples_split: 10
-  min_samples_leaf: 5
+  max_depth: 3
+  min_samples_split: 30
+  min_samples_leaf: 30
   n_estimators: 100
   random_state: 42
 

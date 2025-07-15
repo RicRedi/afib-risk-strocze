@@ -29,8 +29,10 @@ import json
 from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
+# import seaborn as sns
 import statsmodels.api as sm
 from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score
 from utils.config_singleton import ConfigSingleton
 from plotting import CorrelationPlotter#, DecisionTreePlotter
 from core import (
@@ -71,6 +73,7 @@ class HemorrhageAnalysis:
             self.cfg.hemorrhage.variables,
             self.cfg.hemorrhage.reference_var,
             )
+        self.df = self.df[self.df["CHA₂DS₂-VASc"] <= 4]
         self.result = {var: {} for var in self.cfg.hemorrhage.variables}
     def __make_suspect__(
         self,
@@ -91,7 +94,8 @@ class HemorrhageAnalysis:
     def __variable_preprocessing__(
         self,
         ) -> np.ndarray:
-        """Preprocess the variables for analysis.
+        """
+        Preprocess the variables for analysis.
         This method can include normalization, encoding, or other preprocessing steps
         as defined in the configuration.
         """
@@ -133,7 +137,7 @@ class HemorrhageAnalysis:
             min_samples_leaf = self.cfg.hemorrhage.model.min_samples_leaf,
             random_state = self.cfg.hemorrhage.model.random_state,
             class_weight = 'balanced',
-        )
+            )
 
         # Preprocess the variables
         y = self.__variable_preprocessing__()
@@ -147,6 +151,25 @@ class HemorrhageAnalysis:
         importances = np.array(
             self.clf.feature_importances_,
             )
+        # Uncomment the following lines to visualize feature importances
+        # plt.figure(figsize=(10, 6))
+        # sns.barplot(
+        #     x = self.x.columns,
+        #     y = importances,
+        #     )
+        # plt.title("Feature Importances")
+        # plt.show(
+        #     block = False,
+        #     )
+
+        y_pred_train = self.clf.predict(self.x.values)
+        acc = accuracy_score(
+            y.values,
+            y_pred_train,
+            )
+        self.result["accuracy"] = np.round(acc,2)
+        # print(f"Trénovací přesnost: {acc:.2%}")
+
         i = 0
         for _, var in enumerate(self.cfg.hemorrhage.variables):
             if var not in self.x.columns:
@@ -206,7 +229,9 @@ class HemorrhageAnalysis:
         )
         plt.title("Decision Tree for Suspect Identification")
         plt.tight_layout()
-
+        plt.show(
+            block = True,
+            )
 
     def pipeline(
         self

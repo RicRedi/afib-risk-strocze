@@ -225,7 +225,7 @@ def make_condition(
         raise ValueError(f"Unsupported operator: {op}") from exc
 
 def evaluate_logic(
-    df,
+    df: pd.DataFrame,
     conditions: Dict[str, dict],
     logic: str
     ) -> pd.Series:
