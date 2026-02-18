@@ -26,11 +26,19 @@ independent_binary_variables:
   - Osobní anamnéza (choice=Hyperlipidémie)
 
 # Independent categorical variables with multiple categories
-# reference_var: Záchyt FiS
-reference_var: Vstupní událost - indikace MDT EKG monitorace
+reference_var: Záchyt FiS MDT celkově
+# reference_var: Vstupní událost - indikace MDT EKG monitorace
 
 model_features:
   - CHA₂DS₂-VASc
   # - Ejekční frakce levé komory (LVEF)
   # - HDL
   # - TAG
+
+conditions:
+  cond1:
+    col: Záchyt FiS MDT celkově
+    op: "=="
+    value: 1
+
+logic: cond1

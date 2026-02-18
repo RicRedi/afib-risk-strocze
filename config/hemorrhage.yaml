@@ -3,20 +3,20 @@
 # Independent variables to be used in the analysis
 variables:
   - BMI
-  # - Časový odstup od iCMP/TIA
-  # - Rozměr levé síně
-  # - Enddiastolický rozměr levé komory (LVEDD)
-  # - Interventrikulární septum (IVS)
-  # - Zadní stěna levé komory (Inferolat.)
-  # - Ejekční frakce levé komory (LVEF)
-  # - Celkový cholesterol
+  - Časový odstup od iCMP/TIA
+  - Rozměr levé síně
+  - Enddiastolický rozměr levé komory (LVEDD)
+  - Interventrikulární septum (IVS)
+  - Zadní stěna levé komory (Inferolat.)
+  - Ejekční frakce levé komory (LVEF)
+  - Celkový cholesterol
   - LDL
-  # - HDL
-  # - TAG
-  # - eGFR
-  # - Sérový kreatinin
-  # - SVES - počet záznamů 
-  # - KES - počet záznamů
+  - HDL
+  - TAG
+  - eGFR
+  - Sérový kreatinin
+  - SVES - počet záznamů 
+  - KES - počet záznamů
   
 
 reference_var:
@@ -25,6 +25,7 @@ reference_var:
   - Antikoagulancia (choice=Žádná)
   - Závažné krvácivé komplikace během léčby (choice=Žádné)
   - Méně závažné krvácivé komplikace během léčby (choice=Žádné)
+  - Záchyt FiS MDT celkově
 
 conditions:
   # cond1:
@@ -47,8 +48,13 @@ conditions:
     col: Méně závažné krvácivé komplikace během léčby (choice=Žádné)
     op: "=="
     value: 0
+  cond6:
+    col: Záchyt FiS MDT celkově
+    op: "=="
+    value: 1
  
-logic: "(cond2 | cond3) & cond4 & cond5"
+logic: cond6
+#"(cond2 | cond3) & cond4 & cond5"
 # "cond1 & (cond2 | cond3 | cond4 )"
 
 model:

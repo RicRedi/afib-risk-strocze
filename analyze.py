@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from scipy.stats import pearsonr, ttest_ind, levene
-from scipy.stats import chi2_contingency#, fisher_exact
+from scipy.stats import chi2_contingency, fisher_exact
 from statsmodels.stats.contingency_tables import Table2x2
 from core import (
     validate_inputs_from_signature,
@@ -67,6 +67,7 @@ class VariableCorrelationAnalyzer:
         self.variables = []
         self.df = None
         self.result = {}
+        self.reference_var = None
 
     def __reset__(
         self,
@@ -75,6 +76,7 @@ class VariableCorrelationAnalyzer:
         self.variables = []
         self.df = None
         self.result = {}
+        self.reference_var = None
 
     def __repr__(
         self,
@@ -102,9 +104,9 @@ class VariableCorrelationAnalyzer:
         Returns:
             None
         """
-        self.variables = self.cfg.hemorrhage.variables
-        #        getattr(self.cfg.variables, variables_key, [])
-        # self.reference_var = self.cfg.variables.reference_var
+        # self.variables = self.cfg.hemorrhage.variables
+        self.variables = getattr(self.cfg.variables, variables_key, [])
+        self.reference_var = self.cfg.variables.reference_var
         if not self.variables or not self.cfg.variables.reference_var:
             raise KeyError(
                 f"Configuration must contain {variables_key} "
@@ -112,10 +114,10 @@ class VariableCorrelationAnalyzer:
             )
         self.df = load_data(
             self.cfg.analysis.file_path,
-            # self.variables,
-            # self.cfg.variables.reference_var,
-            self.cfg.hemorrhage.variables,
-            self.cfg.hemorrhage.reference_var,
+            self.variables,
+            self.cfg.variables.reference_var,
+            # self.cfg.hemorrhage.variables,
+            # self.cfg.hemorrhage.reference_var,
             )
         self.result = {var: {} for var in self.variables}
 
@@ -149,8 +151,8 @@ class VariableCorrelationAnalyzer:
 
         y = evaluate_logic(
             self.df,
-            self.cfg.hemorrhage.conditions,
-            self.cfg.hemorrhage.logic,
+            self.cfg.variables.conditions,
+            self.cfg.variables.logic,
             ).astype(    # Convert the mask to boolean
                 int,
                 )
@@ -238,17 +240,41 @@ class VariableCorrelationAnalyzer:
         # Save results if configured to do so
         if self.cfg.analysis.save_results:
             self.save_results(
-                variables_key = 'continuous_variables_cmp_tia_mapping',
+                variables_key = 'continuous_variables_zachyt_FiS_mapping',
                 )
 
     def _logistic_regression(
         self,
         x: pd.Series | np.ndarray,
         y: pd.Series | np.ndarray,
+        use_weights: bool = True
         ) -> tuple[float, float]:
         """Performs logistic regression and returns the coefficient and p-value."""
-        xx = sm.add_constant(x).values
-        model = sm.Logit(y, xx).fit(disp=0)
+        x = np.asarray(x)
+        y = np.asarray(y)
+
+        xx = sm.add_constant(x)
+
+        if use_weights:
+            # class weights = inverse prevalence
+            p1 = np.mean(y == 1)
+            p0 = np.mean(y == 0)
+
+            w = np.where(y == 1, 1/p1, 1/p0)
+
+            model = sm.GLM(
+                y,
+                xx,
+                family=sm.families.Binomial(),
+                freq_weights=w
+            ).fit()
+        else:
+            model = sm.GLM(
+                y,
+                xx,
+                family=sm.families.Binomial()
+            ).fit()
+
         return model.params[1], model.pvalues[1]
 
     def analyze_binary(
@@ -271,8 +297,8 @@ class VariableCorrelationAnalyzer:
 
         y = evaluate_logic(
             self.df,
-            self.cfg.hemorrhage.conditions,
-            self.cfg.hemorrhage.logic,
+            self.cfg.variables.conditions,
+            self.cfg.variables.logic,
             ).astype(    # Convert the mask to boolean
                 int,
                 )
@@ -303,6 +329,10 @@ class VariableCorrelationAnalyzer:
 
             # Chi-squared test
             chi2, p_value, _, _ = chi2_contingency(contingency)
+            binar_type = "chi2_contingency"
+            # Chi-squared test
+            chi2, p_value = fisher_exact(contingency)
+            binar_type = "fisher-exact"
             CorrelationPlotter(
                 var = var,
                 reference_var = self.cfg.variables.reference_var,
@@ -323,14 +353,14 @@ class VariableCorrelationAnalyzer:
                 'odds_ratio': odds_ratio,
                 'odds_CI_lower': confint[0],
                 'odds_CI_upper': confint[1],
-                'type': 'binary-association',
+                'type': binar_type,
                 'data used [%]': np.round(len(x) / len(self.df[var]) * 100, 2),
             }
 
         # Save results if configured to do so
         if self.cfg.analysis.save_results:
             self.save_results(
-                variables_key = 'binary_variables_cmp_tia_mapping',
+                variables_key = 'binary_variables_zachyt_FiS_mapping',
                 )
 
     def save_results(
@@ -348,7 +378,7 @@ class VariableCorrelationAnalyzer:
         """
         with open(
             self.cfg.analysis.save_path + \
-                f'/analysis_results_{variables_key}_correlations_hemorrhage.json',
+                f'/analysis_results_{variables_key}_correlations.json',
             'w',
             encoding = 'utf-8'
             ) as f:
