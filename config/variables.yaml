@@ -18,12 +18,26 @@ independent_continuous_variables:
   - SVES - počet záznamů 
   - KES - počet záznamů
   - CHA₂DS₂-VASc
+  - NIHSS vstupní
+  - Věk při iCMP/TIA
+  - SVES
+
+
 
 # Independent categorical variables
 independent_binary_variables:
   - Kuřák v době vzniku příznaků iCMP/TIA
   - Abusus alkoholu
   - Osobní anamnéza (choice=Hyperlipidémie)
+  - Pohlaví
+  - Typ akutní ischemie (choice=Teritoriální)
+  - Typ akutní ischemie (choice=Lakunární)
+  - Typ akutní ischemie (choice=Borderzone)
+  - Typ akutní ischemie (choice=Ischemie nezachycena)
+  - Staré postischemické změny (choice=Nejsou)
+  - Staré postischemické změny (choice=Ve stejném povodí jako akutní ischemie)
+  - Staré postischemické změny (choice=V jiném povodí než akutní ischemie)
+  - Staré postischemické změny (choice=Difuzně v bílé hmotě)
 
 # Independent categorical variables with multiple categories
 reference_var: Záchyt FiS MDT celkově

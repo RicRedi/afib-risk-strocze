@@ -83,12 +83,12 @@ def convert_column_to_binary(
     """
     if numpy:
         return series.str.strip().str.lower().map({
-            'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1,
+            'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1, 'muž': 1, 'žena': 0,
             'no': 0, 'n': 0, 'false': 0, '0': 0, 'unchecked': 0, 'ne': 0,
         }).values
 
     return series.str.strip().str.lower().map({
-            'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1,
+            'yes': 1, 'y': 1, 'true': 1, '1': 1, 'checked': 1, 'ano': 1, 'muž': 1, 'žena': 0,
             'no': 0, 'n': 0, 'false': 0, '0': 0, 'unchecked': 0, 'ne': 0,
         })
 
