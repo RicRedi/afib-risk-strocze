@@ -1,3 +1,24 @@
+# ============================================================
+# Project  : AFib Risk Factor Correlation Analysis
+# File     : analysis.yaml
+# Created on 18. 03. 2026 at 16:07:49
+#
+# Author: Richard Redina
+# Email: 195715@vut.cz
+# Affiliation:
+#          International Clinical Research Center, Brno
+#          Brno University of Technology, Brno
+# GitHub: RicRedi
+# 
+# (._.)
+#  <|>
+# _/|_
+# 
+# Description:
+#     Configuration file for correlation analysis settings.
+#     Defines file paths, thresholds for outlier detection, significance level,
+#     and output settings for the analysis pipeline.
+# ============================================================
 # File paths
 file_path: ./src/STROCZECHMDTHolterEK_DATA_LABELS_2025-05-21_1136p.xls
 

@@ -1,6 +1,24 @@
-# Configuration file for plotting settings
-# This file contains settings for plotting the results of the analysis.
-# Ensure that the file paths are correct and accessible.
+# ============================================================
+# Project  : AFib Risk Factor Correlation Analysis
+# File     : plotting.yaml
+# Created on 18. 03. 2026 at 00:00:00
+#
+# Author: Richard Redina
+# Email: 195715@vut.cz
+# Affiliation:
+#          International Clinical Research Center, Brno
+#          Brno University of Technology, Brno
+# GitHub: RicRedi
+# 
+# (._.) 
+#  <|>
+# _/|_
+# 
+# Description:
+#     Configuration file for visualization settings.
+#     Defines output paths, DPI, plot dimensions, and font sizes for correlation plots.
+#     Ensure that the file paths are correct and accessible.
+# ============================================================
 
 # Saving plots settings
 save_plots: True

@@ -22,6 +22,7 @@ Description:
 import inspect
 from typing import Callable, Dict
 import operator
+import ast
 import pandas as pd
 import pandas.api.types as ptypes
 import numpy as np
@@ -157,28 +158,89 @@ def make_condition(
     except KeyError as exc:
         raise ValueError(f"Unsupported operator: {op}") from exc
 
+def _evaluate_ast(
+    node,
+    local_vars: Dict
+    ) -> pd.Series:
+    """
+    Recursively evaluates an AST node for boolean logic operations.
+    Supports 'and', 'or', and 'not' operations on pandas Series.
+    
+    Args:
+        node: AST node to evaluate.
+        local_vars (Dict): Dictionary mapping variable names to pandas Series (boolean masks).
+    
+    Returns:
+        pd.Series: Result of the evaluation as boolean Series.
+    
+    Raises:
+        ValueError: If unsupported operation is encountered or unknown variable referenced.
+    """
+    if isinstance(node, ast.BoolOp):
+        # Handle 'and' and 'or' operations
+        values = [_evaluate_ast(v, local_vars) for v in node.values]
+        if isinstance(node.op, ast.And):
+            result = values[0]
+            for val in values[1:]:
+                result = result & val
+            return result
+        elif isinstance(node.op, ast.Or):
+            result = values[0]
+            for val in values[1:]:
+                result = result | val
+            return result
+    elif isinstance(node, ast.Name):
+        # Handle variable names (condition references)
+        if node.id not in local_vars:
+            raise ValueError(f"Unknown variable: {node.id}")
+        return local_vars[node.id]
+    elif isinstance(node, ast.UnaryOp):
+        # Handle 'not' operation
+        operand = _evaluate_ast(node.operand, local_vars)
+        if isinstance(node.op, ast.Not):
+            return ~operand
+        else:
+            raise ValueError(f"Unsupported unary operation: {type(node.op).__name__}")
+    else:
+        raise ValueError(f"Unsupported operation: {type(node).__name__}")
+
 def evaluate_logic(
     df: pd.DataFrame,
     conditions: Dict[str, dict],
     logic: str
     ) -> pd.Series:
-    """_summary_
-
-    Args:
-        df (_type_): _description_
-        conditions (Dict[str, dict]): _description_
-        logic (str): _description_
-
-    Returns:
-        pd.Series: _description_
     """
+    Safely evaluates a boolean logic expression on DataFrame conditions using AST parsing.
+    
+    Evaluates expressions like 'cond1 and cond2' or '(cond1 or cond2) and not cond3'
+    without using eval(), preventing potential code injection vulnerabilities.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data.
+        conditions (Dict[str, dict]): Dictionary of conditions with keys mapping
+        to condition specifications.
+        logic (str): Boolean logic expression using condition names and operators (and, or, not).
+                     Example: 'condition1 and (condition2 or not condition3)'
+    
+    Returns:
+        pd.Series: Boolean Series indicating rows that satisfy the logic expression.
+    
+    Raises:
+        ValueError: If the logic expression contains unsupported operations or unknown variables.
+        SyntaxError: If the logic expression has syntax errors.
+    """
+    # Build local variables mapping condition names to boolean masks
     name_list = list(vars(conditions).keys())
     local_vars = {
-        name: make_condition(df, getattr(conditions, name)) \
-            for _, name in enumerate(name_list)
-        }
-    return eval(
-        logic,
-        {"__builtins__": {}},
-        local_vars,
-        )
+        name: make_condition(df, getattr(conditions, name))
+        for name in name_list
+    }
+
+    # Parse the logic string into an Abstract Syntax Tree
+    try:
+        tree = ast.parse(logic, mode='eval')
+    except SyntaxError as exc:
+        raise SyntaxError(f"Invalid logic expression: {logic}") from exc
+
+    # Evaluate the AST safely without using eval()
+    return _evaluate_ast(tree.body, local_vars)

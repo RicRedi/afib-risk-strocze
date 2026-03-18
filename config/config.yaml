@@ -1,7 +1,24 @@
-# This is a configuration file for the analysis of STROCZECHMDTHolterEK data.
-# It includes settings for the file paths, significance level, independent variables,
-# and the reference variable to be used in the analysis.
-# Ensure that the file paths are correct and accessible.
+# ============================================================
+# Project  : AFib Risk Factor Correlation Analysis
+# File     : config.yaml
+# Created on 18. 03. 2026 at 00:00:00
+#
+# Author: Richard Redina
+# Email: 195715@vut.cz
+# Affiliation:
+#          International Clinical Research Center, Brno
+#          Brno University of Technology, Brno
+# GitHub: RicRedi
+# 
+# (._.) 
+#  <|>
+# _/|_
+# 
+# Description:
+#     Main configuration file for the correlation analysis pipeline.
+#     Aggregates settings from analysis, variables, and plotting config files.
+#     Ensures that the file paths are correct and accessible.
+# ============================================================
 
 # Configuration file for plotting
 plotting: ./config/plotting.yaml

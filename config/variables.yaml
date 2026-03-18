@@ -1,4 +1,24 @@
-# Configuration file for correlation analysis
+# ============================================================
+# Project  : AFib Risk Factor Correlation Analysis
+# File     : variables.yaml
+# Created on 18. 03. 2026 at 00:00:00
+#
+# Author: Richard Redina
+# Email: 195715@vut.cz
+# Affiliation:
+#          International Clinical Research Center, Brno
+#          Brno University of Technology, Brno
+# GitHub: RicRedi
+# 
+# (._.) 
+#  <|>
+# _/|_
+# 
+# Description:
+#     Configuration file defining independent variables for correlation analysis.
+#     Includes continuous and categorical variables to be analyzed against
+#     the reference outcome variable.
+# ============================================================
 
 # Independent variables to be used in the analysis
 independent_continuous_variables:
