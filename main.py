@@ -15,15 +15,10 @@ GitHub: RicRedi
 _/|_
 
 Description:
-    Correlations Analysis
+    Correlations Analysis - AFib Risk Factor Identification
 """
 from analyze import VariableCorrelationAnalyzer
-from hemorrhage_analysis import HemorrhageAnalysis
 from utils.config_singleton import ConfigSingleton
 
-i = 1
 ConfigSingleton.set()
-if i == 1:
-    VariableCorrelationAnalyzer().pipeline()
-else:
-    HemorrhageAnalysis().pipeline()
+VariableCorrelationAnalyzer().pipeline()

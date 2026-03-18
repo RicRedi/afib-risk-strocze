@@ -92,24 +92,6 @@ def convert_column_to_binary(
             'no': 0, 'n': 0, 'false': 0, '0': 0, 'unchecked': 0, 'ne': 0,
         })
 
-def cmp_tia_mapping(
-    x: pd.Series,
-    ) -> pd.Series:
-    """Maps values in a pandas Series to integers based on a provided mapping dictionary.
-    The function replaces each value in the Series with its corresponding integer from the mapping.
-    If a value is not found in the mapping, it is replaced with NaN.
-    
-    Args:
-        x (pd.Series): Input pandas Series containing values to be mapped.
-        
-    Returns:
-        pd.Series: A new pandas Series with values replaced by their corresponding integers
-                   from the mapping.
-    """
-    top_two = x.value_counts().index[:2]
-    mapping = {top_two[0]: 1, top_two[1]: 0}
-    return x.map(mapping)
-
 def remove_outliers_iqr(
     x: pd.Series,
     threshold: float = 1.5,
@@ -130,55 +112,6 @@ def remove_outliers_iqr(
     lower_bound = q1 - threshold * iqr
     upper_bound = q3 + threshold * iqr
     return x[(x >= lower_bound) & (x <= upper_bound)].reset_index(drop=True)
-
-def remove_outliers_iqr_df(
-    df: pd.DataFrame,
-    threshold: float = 1.5,
-    ) -> pd.DataFrame:
-    """
-    Removes outlier rows from a DataFrame using the IQR method.
-    A row is removed if any of its values in continuous columns are outside the IQR bounds.
-
-    Args:
-        df (pd.DataFrame): Input DataFrame with continuous numeric columns.
-        threshold (float, optional): Multiplier for IQR to define outliers. Defaults to 1.5.
-
-    Returns:
-        pd.DataFrame: A new DataFrame with outlier rows removed.
-    """
-    mask = pd.Series(True, index=df.index)
-
-    for col in df.columns:
-        if pd.api.types.is_numeric_dtype(df[col]):
-            q1 = df[col].quantile(0.25)
-            q3 = df[col].quantile(0.75)
-            iqr = q3 - q1
-            lower_bound = q1 - threshold * iqr
-            upper_bound = q3 + threshold * iqr
-            mask &= df[col].between(lower_bound, upper_bound)
-
-    return df[mask].reset_index(drop=True)
-
-def remove_outliers_z_score(
-    x: pd.Series,
-    threshold: float = 3.0,
-    ) -> pd.Series:
-    """Removes outliers from a pandas Series using the Z-score method.
-    The function calculates the mean and standard deviation of the data,
-    computes the Z-scores, and identifies outliers as values with an absolute Z-score
-    greater than the specified threshold. It returns a new Series with outliers removed.
-    
-    Args:
-        x (pd.Series): Input pandas Series from which to remove outliers.
-        threshold (float, optional): Z-score threshold to define outliers. Defaults to 3.0.
-        
-    Returns:
-        pd.Series: A new pandas Series with outliers removed.
-    """
-    mean = x.mean()
-    std_dev = x.std()
-    z_scores = (x - mean) / std_dev
-    return x[abs(z_scores) <= threshold].reset_index(drop=True)
 
 def make_condition(
     df: pd.DataFrame,
