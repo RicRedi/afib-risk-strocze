@@ -11,9 +11,3 @@ analysis: ./config/analysis.yaml
 
 # Variables configuration file
 variables: ./config/variables.yaml
-
-# Configuration file for model settings
-model: ./config/model.yaml
-
-# Configuration file for hemorrhage analysis
-hemorrhage: ./config/hemorrhage.yaml

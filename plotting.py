@@ -19,13 +19,12 @@ Description:
 """
 import os
 import re
-from datetime import datetime
+# from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier, plot_tree
 from utils.config_singleton import ConfigSingleton
 
 class CorrelationPlotter:
@@ -251,61 +250,3 @@ class CorrelationPlotter:
             str: A sanitized version of the input string suitable for use in filenames.
         """
         return re.sub(r'[^\w\-]', '_', s)
-
-class DecisionTreePlotter:
-    """
-    Class for plotting decision trees.
-    """
-    def __init__(
-        self,
-        clf: DecisionTreeClassifier,
-        var: str | list[str],
-        reference_var: str | list[str],
-        ) -> None:
-        """Initialize the TreePlotter with a classifier and configuration."""
-        self.clf = clf
-        self.cfg = ConfigSingleton.get()
-        self.var = var
-        self.reference_var = reference_var
-
-    def plot(
-        self,
-        ) -> None:
-        """Plot the decision tree."""
-        plt.figure(
-            figsize = (
-                self.cfg.plotting.figsize.width,
-                self.cfg.plotting.figsize.height,
-                )
-            )
-        plot_tree(
-            self.clf,
-            feature_names = self.var if isinstance(
-                self.var,
-                list
-                ) else [self.var],
-            class_names = self.reference_var if isinstance(
-                self.reference_var,
-                list
-                ) else [self.reference_var],
-            filled = True,
-            rounded = True,
-            max_depth = self.cfg.hemorrhage.model.max_depth,
-            fontsize = self.cfg.plotting.fontsize.tree,
-        )
-        plt.title("Decision Tree for Suspect Identification")
-        plt.tight_layout()
-        if self.cfg.hemorrhage.tree_plot.save:
-            os.makedirs(self.cfg.hemorrhage.tree_plot.save_path, exist_ok=True)
-            timestamp = datetime.now().strftime("%Y_%m_%d_%H%M%S")
-            filename = f"decision_tree_{timestamp}.png"
-            plt.savefig(
-                os.path.join(
-                    self.cfg.hemorrhage.tree_plot.save_path,
-                    filename,
-                ),
-                dpi = self.cfg.hemorrhage.tree_plot.dpi,
-            )
-        else:
-            print("Tree plot will not be saved as per configuration.")
-            plt.show(block = False)

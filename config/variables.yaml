@@ -22,8 +22,6 @@ independent_continuous_variables:
   - Věk při iCMP/TIA
   - SVES
 
-
-
 # Independent categorical variables
 independent_binary_variables:
   - Kuřák v době vzniku příznaků iCMP/TIA
