@@ -205,13 +205,43 @@ if __name__ == "__main__":
         print(f"  - Point-Based Score: {score_2['total_points']:.2f}")
         print(f"  - Intercept: {score_2['intercept']:.4f}")
 
+        # Create another sample patient (high risk)
+        print("\n" + "="*70)
+        print("Sample Patient #3 - High Risk Profile")
+        print("="*70)
+
+        patient_3 = {
+            "Enddiastolický rozměr levé komory (LVEDD)": 65.0,
+            "Interventrikulární septum (IVS)": 10.0,
+            "CHA₂DS₂-VASc": 7,
+            "Ejekční frakce levé komory (LVEF)": 35.0,
+            "BMI": 35.0,
+            "Typ akutní ischemie (choice=Teritoriální)": 1,
+            "Osobní anamnéza (choice=Hyperlipidémie)": 1,
+            "Sérový kreatinin": 90.0,
+        }
+
+        print("\nPatient values:")
+        for feature, value in patient_3.items():
+            print(f"  - {feature.split('(', maxsplit=1)[0].strip()}: {value}")
+
+        # Predict
+        risk_prob_3 = predict_with_model(model, patient_3, model_features)
+        score_3 = predict_from_scorecard(scorecard, patient_3)
+
+        print("\nPrediction Results:")
+        print(f"  - Risk Probability: {risk_prob_3:.4f} ({risk_prob_3*100:.2f}%)")
+        print(f"  - Point-Based Score: {score_3['total_points']:.2f}")
+        print(f"  - Intercept: {score_3['intercept']:.4f}")
+
         # Summary comparison
         print("\n" + "="*70)
         print("Comparison Summary")
         print("="*70)
-        print(f"Patient 1 Risk Probability: {risk_prob_1:.4f} vs Patient 2: {risk_prob_2:.4f}")
-        print(f"Risk Difference: {(risk_prob_1 - risk_prob_2)*100:.2f} percentage points")
-        print(f"Patient 1 is {'HIGHER' if risk_prob_1 > risk_prob_2 else 'LOWER'} risk")
+        print(f"Patient 1 Risk Probability: {risk_prob_1:.4f} vs Patient 2: {risk_prob_2:.4f} \
+            vs Patient 3: {risk_prob_3:.4f}")
+        # print(f"Risk Difference: {(risk_prob_1 - risk_prob_2)*100:.2f} percentage points")
+        # print(f"Patient 1 is {'HIGHER' if risk_prob_1 > risk_prob_2 else 'LOWER'} risk")
 
     except (FileNotFoundError, json.JSONDecodeError, KeyError, ValueError, OSError) as e:
         print(f"\nERROR: {e}")
