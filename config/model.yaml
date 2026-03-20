@@ -1,0 +1,57 @@
+# ============================================================
+# Project  : AFib Risk Factor Correlation Analysis
+# File     : model.yaml
+# Created on 19. 03. 2026 at 00:00:00
+#
+# Author: Richard Redina
+# Email: 195715@vut.cz
+# Affiliation:
+#          International Clinical Research Center, Brno
+#          Brno University of Technology, Brno
+# GitHub: RicRedi
+# 
+# (._.)
+#  <|>
+# _/|_
+# 
+# Description:
+#     Configuration file for the clinical risk score model.
+#     Defines fixed variables for logistic regression model training,
+#     point transformation settings, and model output paths.
+# ============================================================
+
+# Reference outcome variable (target for prediction)
+reference_var: Záchyt FiS MDT celkově
+
+# Fixed model features (exact variable names from Excel)
+# These variables will be used to train the logistic regression model
+model_features:
+  - Enddiastolický rozměr levé komory (LVEDD)
+  - Interventrikulární septum (IVS)
+  - CHA₂DS₂-VASc
+  - Ejekční frakce levé komory (LVEF)
+  - BMI
+  - Typ akutní ischemie (choice=Teritoriální)
+  - Osobní anamnéza (choice=Hyperlipidémie)
+  - Sérový kreatinin
+
+# Point transformation settings
+# Scaling factor: used to convert normalized coefficients to integer points
+# Formula: (β / min|β|) * scaling_factor → round to nearest integer
+scaling_factor: 10
+
+# Model serialization paths
+model_output:
+  # Path to save the trained model (.joblib format)
+  model_path: ./results/risk_model.joblib
+  # Path to save the point table / scorecard (.json format)
+  scorecard_path: ./results/risk_scorecard.json
+
+# Data filtering (optional - filter training data)
+# If you want to filter training data before fitting, specify conditions here
+# Example: only include patients with specific criteria
+apply_filter: false
+# filter_conditions:
+#   col: Záchyt FiS MDT celkově
+#   op: "=="
+#   value: 1

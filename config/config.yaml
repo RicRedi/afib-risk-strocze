@@ -28,3 +28,6 @@ analysis: ./config/analysis.yaml
 
 # Variables configuration file
 variables: ./config/variables.yaml
+
+# Model configuration file
+model: ./config/model.yaml
