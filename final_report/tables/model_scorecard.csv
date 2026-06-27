@@ -1,0 +1,4 @@
+﻿Feature,β (log-OR),OR (e^β),Body/jednotku,Typ,Poznámka
+CHA₂DS₂-VASc,1.1014,3.0084,11.01,kontinuální,
+Typ akutní ischemie (choice=Teritoriální),1.03175,2.806,10.32,binární,
+Osobní anamnéza (choice=Hyperlipidémie),-1.0,0.3679,-10.0,binární,treatment paradox*
