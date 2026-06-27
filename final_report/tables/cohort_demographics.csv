@@ -1,0 +1,8 @@
+﻿Charakteristika,Hodnota
+Celkem pacientů v datasetu,n = 5083
+Kompletní záznamy (použité v modelu),n = 1884 (37.1 %)
+AFib+ záchyt (MDT celkově),n = 111 (5.9 %)
+Trénovací sada,"n = 1507 (80 %), AFib+ 89 (5.9 %)"
+Testovací sada,"n = 377 (20 %), AFib+ 22 (5.8 %)"
+Věk — medián [IQR],viz Excel data (není v scorecard)
+Pohlaví — ženy,viz Excel data (není v scorecard)

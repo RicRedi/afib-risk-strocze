@@ -179,9 +179,20 @@ cython_debug/
 *.xls
 *.xlsx
 
-# result files
-*.json
-*.png
-plots/
+# Patient data — NEVER commit
 src/
-results/
+
+# Binary model files (large, reproducible from training)
+results/*.joblib
+
+# Intermediate analysis JSONs (large, reproducible from analyze.py)
+results/analysis_results_*.json
+
+results/importances*.json
+# Intermediate plots
+plots/
+
+# Final report outputs — commit these (figures, tables, no patient data)
+!final_report/figures/*.png
+!final_report/figures/*.pdf
+!final_report/tables/*.csv

@@ -1,0 +1,9 @@
+﻿Proměnná,Celkem záznamů,Po čištění,Completeness (%)
+Enddiastolický rozměr levé komory (LVEDD),5083,2557,50.3
+Ejekční frakce levé komory (LVEF),5083,2677,52.67
+Interventrikulární septum (IVS),5083,2692,52.96
+BMI,5083,3701,72.81
+Sérový kreatinin,5083,3904,76.81
+CHA₂DS₂-VASc,5083,5075,99.84
+Typ akutní ischemie (choice=Teritoriální),5083,5083,100.0
+Osobní anamnéza (choice=Hyperlipidémie),5083,5083,100.0

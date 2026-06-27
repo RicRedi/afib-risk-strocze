@@ -1,0 +1,20 @@
+﻿Proměnná,β (log-OR),p-hodnota,p < 0.05,Typ testu,Data použita (%)
+Interventrikulární septum (IVS),-0.10003,0.0,ANO,logistic,52.96
+LDL,-0.15218,0.0,ANO,logistic,65.34
+CHA₂DS₂-VASc,0.05802,0.0,ANO,logistic,99.84
+Enddiastolický rozměr levé komory (LVEDD),0.0237,1.1e-05,ANO,logistic,50.3
+HDL,-0.19842,0.006306,ANO,logistic,64.51
+SVES,0.24494,0.007728,ANO,logistic,4.76
+SVES - počet záznamů,0.00861,0.013473,ANO,logistic,34.43
+Ejekční frakce levé komory (LVEF),-0.01585,0.022301,ANO,logistic,52.67
+eGFR,0.18689,0.048684,ANO,logistic,47.16
+BMI,-0.01011,0.060338,ne,logistic,72.81
+TAG,-0.06225,0.08329,ne,logistic,68.01
+Sérový kreatinin,-0.00225,0.089062,ne,logistic,76.81
+Časový odstup od iCMP/TIA,-0.00399,0.092645,ne,logistic,53.71
+Věk při iCMP/TIA,-0.00231,0.168086,ne,logistic,79.22
+Rozměr levé síně,0.00362,0.44724,ne,logistic,55.56
+Celkový cholesterol,-0.0149,0.447662,ne,logistic,76.37
+KES - počet záznamů,-0.00353,0.46397,ne,logistic,33.19
+Zadní stěna levé komory (Inferolat.),0.00828,0.64459,ne,logistic,50.46
+NIHSS vstupní,0.00091,0.918725,ne,logistic,70.37

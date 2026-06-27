@@ -112,7 +112,7 @@ def remove_outliers_iqr(
     iqr = q3 - q1
     lower_bound = q1 - threshold * iqr
     upper_bound = q3 + threshold * iqr
-    return x[(x >= lower_bound) & (x <= upper_bound)].reset_index(drop=True)
+    return x[(x >= lower_bound) & (x <= upper_bound)]
 
 def make_condition(
     df: pd.DataFrame,

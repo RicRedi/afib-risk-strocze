@@ -1,0 +1,219 @@
+{
+    "intercept": -0.7829058011746732,
+    "intercept_scaled": -30.046618380223084,
+    "scaling_factor": 10,
+    "variables": {
+        "CHA₂DS₂-VASc": {
+            "points_per_unit": 11.014015450965436,
+            "type": "continuous"
+        },
+        "Typ akutní ischemie (choice=Teritoriální)": {
+            "points_per_unit": 10.317499761108076,
+            "type": "binary"
+        },
+        "Osobní anamnéza (choice=Hyperlipidémie)": {
+            "points_per_unit": -10.0,
+            "type": "binary"
+        }
+    },
+    "training_data_info": {
+        "total_rows_in_dataset": 5083,
+        "rows_with_complete_data": 1884,
+        "data_completeness_%": 37.06,
+        "feature_completeness": {
+            "Enddiastolický rozměr levé komory (LVEDD)": {
+                "original_count": 5083,
+                "after_cleaning": 2557,
+                "completeness_%": 50.3
+            },
+            "Interventrikulární septum (IVS)": {
+                "original_count": 5083,
+                "after_cleaning": 2692,
+                "completeness_%": 52.96
+            },
+            "CHA₂DS₂-VASc": {
+                "original_count": 5083,
+                "after_cleaning": 5075,
+                "completeness_%": 99.84
+            },
+            "Ejekční frakce levé komory (LVEF)": {
+                "original_count": 5083,
+                "after_cleaning": 2677,
+                "completeness_%": 52.67
+            },
+            "BMI": {
+                "original_count": 5083,
+                "after_cleaning": 3701,
+                "completeness_%": 72.81
+            },
+            "Typ akutní ischemie (choice=Teritoriální)": {
+                "original_count": 5083,
+                "after_cleaning": 5083,
+                "completeness_%": 100.0
+            },
+            "Osobní anamnéza (choice=Hyperlipidémie)": {
+                "original_count": 5083,
+                "after_cleaning": 5083,
+                "completeness_%": 100.0
+            },
+            "Sérový kreatinin": {
+                "original_count": 5083,
+                "after_cleaning": 3904,
+                "completeness_%": 76.81
+            }
+        },
+        "target_positive_cases": 111,
+        "target_negative_cases": 1773,
+        "rfecv_n_features_range": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+        ],
+        "rfecv_mean_scores": [
+            0.625498452405777,
+            0.6165096395572695,
+            0.61872116915782,
+            0.6189004705529351,
+            0.6148700451744655,
+            0.6243226362035458
+        ],
+        "rfecv_std_scores": [
+            0.04183317804960885,
+            0.051233665948768506,
+            0.049801724625292795,
+            0.04812833195055488,
+            0.05718290956968406,
+            0.05530586399134714
+        ],
+        "n_features_original": 8,
+        "n_features_selected": 3,
+        "all_features": [
+            "Enddiastolický rozměr levé komory (LVEDD)",
+            "Interventrikulární septum (IVS)",
+            "CHA₂DS₂-VASc",
+            "Ejekční frakce levé komory (LVEF)",
+            "BMI",
+            "Typ akutní ischemie (choice=Teritoriální)",
+            "Osobní anamnéza (choice=Hyperlipidémie)",
+            "Sérový kreatinin"
+        ],
+        "selected_features": [
+            "CHA₂DS₂-VASc",
+            "Typ akutní ischemie (choice=Teritoriální)",
+            "Osobní anamnéza (choice=Hyperlipidémie)"
+        ],
+        "train_samples": 1507,
+        "test_samples": 377,
+        "train_positive": 89,
+        "test_positive": 22,
+        "epv": 29.67,
+        "epv_warning": false
+    },
+    "cv_performance": {
+        "n_splits": 5,
+        "auc_mean": 0.6333345599601943,
+        "auc_std": 0.03132698299213536,
+        "sensitivity_mean": 0.558498023715415,
+        "sensitivity_std": 0.12327707770880174,
+        "specificity_mean": 0.6401273175777831,
+        "specificity_std": 0.05569317002569541,
+        "fold_auc": [
+            0.639180537772087,
+            0.6484635083226632,
+            0.5827144686299615,
+            0.6195038074183247,
+            0.6768104776579353
+        ],
+        "fold_sensitivity": [
+            0.5,
+            0.6363636363636364,
+            0.36363636363636365,
+            0.5652173913043478,
+            0.7272727272727273
+        ],
+        "fold_specificity": [
+            0.6366197183098592,
+            0.6028169014084507,
+            0.7352112676056338,
+            0.655367231638418,
+            0.5706214689265536
+        ]
+    },
+    "test_performance": {
+        "n_test": 377,
+        "n_positive": 22,
+        "n_negative": 355,
+        "cohort_prevalence": 0.058355437665782495,
+        "auc_roc": 0.6469270166453266,
+        "brier_score": 0.2393922923498847,
+        "optimal_threshold": 0.38473483530467406,
+        "sensitivity": 0.9545454545454546,
+        "specificity": 0.30140845070422534,
+        "ppv": 0.07806691449814127,
+        "npv": 0.9907407407407407,
+        "tp": 21,
+        "tn": 107,
+        "fp": 248,
+        "fn": 1,
+        "n_bootstrap": 1000,
+        "auc_ci_lower": 0.5434026888604353,
+        "auc_ci_upper": 0.7398271446862996,
+        "sensitivity_ci_lower": 0.8636363636363636,
+        "sensitivity_ci_upper": 1.0,
+        "specificity_ci_lower": 0.2535211267605634,
+        "specificity_ci_upper": 0.3465492957746478
+    },
+    "calibration": {
+        "method": "platt_scaling",
+        "brier_uncalibrated": 0.2393922923498847,
+        "brier_calibrated": 0.05449080312373122,
+        "brier_improvement": 0.1849,
+        "note": "calibrated on x_test — metrics below are in-sample for calibration set",
+        "platt_a": -0.801886441511981,
+        "platt_b": 2.7755805186575047,
+        "calibrated_optimal_threshold": 0.04100997338688525,
+        "calibrated_sensitivity": 0.9545454545454546,
+        "calibrated_specificity": 0.30140845070422534,
+        "calibrated_ppv": 0.07806691449814127,
+        "calibrated_npv": 0.9907407407407407,
+        "calibrated_tp": 21,
+        "calibrated_tn": 107,
+        "calibrated_fp": 248,
+        "calibrated_fn": 1,
+        "reliability_uncalibrated": {
+            "fraction_of_positives": [
+                0.01,
+                0.06557377049180328,
+                0.05128205128205128,
+                0.10606060606060606,
+                0.08333333333333333
+            ],
+            "mean_predicted_value": [
+                0.35103403502899655,
+                0.41787410276030695,
+                0.4730505833573545,
+                0.5409544632548345,
+                0.6570382401524808
+            ]
+        },
+        "reliability_calibrated": {
+            "fraction_of_positives": [
+                0.01,
+                0.06557377049180328,
+                0.05128205128205128,
+                0.10606060606060606,
+                0.08333333333333333
+            ],
+            "mean_predicted_value": [
+                0.03681158023484804,
+                0.045734999263972544,
+                0.05428180665307709,
+                0.06665515971486594,
+                0.09685439627065823
+            ]
+        }
+    }
+}
