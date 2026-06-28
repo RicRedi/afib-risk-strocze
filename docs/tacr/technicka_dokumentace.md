@@ -53,8 +53,14 @@ Nízká kompletnost dat (37,1 %) je způsobena tím, že ne všechny sledované 
                            └── risk_model_y_test.npy        ← testovací labely
 
 predict.py ────────────────► Python demo (3 ukázkové pacienty)
-web/index.html ────────────► HTML kalkulačka (GitHub Pages)
 final_report/*.py ─────────► Vizualizace a analytické tabulky
+
+results/risk_scorecard.json
+         │
+         └──► web/generate_scorecard_js.py ──► web/assets/scorecard.js
+                                                        │
+                                               web/index.html ──► GitHub Pages
+                   (⚠ spustit po každém re-tréninku modelu)
 ```
 
 ---

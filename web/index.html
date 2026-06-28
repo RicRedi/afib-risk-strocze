@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulátor rizika FiS po iCMP/TIA — STROCZE</title>
+  <meta name="description" content="Prediktivní nástroj pro stratifikaci pacientů po iCMP/TIA k dlouhodobé holterovské monitoraci. Kohorta STROCZE, VUT Brno.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ HEADER ══ -->
+<header>
+  <div class="container header-inner">
+    <div class="header-icon" aria-hidden="true">♥</div>
+    <div>
+      <h1>Kalkulátor rizika záchytu FiS</h1>
+      <p class="subtitle">Po ischemické CMP / TIA &nbsp;·&nbsp; Kohorta STROCZE &nbsp;·&nbsp; VUT Brno</p>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════════════════ MAIN ══ -->
+<main>
+<div class="container" style="display:flex;flex-direction:column;gap:16px;">
+
+  <!-- ── Calculator card ── -->
+  <section class="card" id="calc-card">
+    <h2>Vstupní data pacienta</h2>
+
+    <!-- CHA₂DS₂-VASc -->
+    <div class="field">
+      <label class="field-label" for="cha">CHA₂DS₂-VASc skóre</label>
+      <p class="field-hint">Celé číslo 0–9 &mdash; součet přítomných rizikových faktorů</p>
+      <div class="stepper" role="group" aria-label="CHA2DS2VASc hodnota">
+        <button type="button" onclick="stepCha(-1)" aria-label="Snížit">−</button>
+        <input type="number" id="cha" min="0" max="9" value="0"
+               oninput="clampCha()" onchange="clampCha()" aria-label="CHA2DS2VASc">
+        <button type="button" onclick="stepCha(+1)" aria-label="Zvýšit">+</button>
+      </div>
+
+      <details class="field-detail">
+        <summary>Jak se počítá CHA₂DS₂-VASc?</summary>
+        <div class="detail-body">
+          <p style="margin-bottom:8px;">Sečtěte body za přítomné faktory. Skóre zpravidla najdete v dokumentaci pacienta.</p>
+          <table>
+            <thead><tr><th>Faktor</th><th>Body</th></tr></thead>
+            <tbody>
+              <tr><td><strong>C</strong> — Kongestivní srdeční selhání</td><td>1</td></tr>
+              <tr><td><strong>H</strong> — Hypertenze</td><td>1</td></tr>
+              <tr><td><strong>A₂</strong> — Věk ≥ 75 let</td><td>2</td></tr>
+              <tr><td><strong>D</strong> — Diabetes mellitus</td><td>1</td></tr>
+              <tr><td><strong>S₂</strong> — Předchozí CMP nebo TIA</td><td>2</td></tr>
+              <tr><td><strong>V</strong> — Vaskulární onemocnění</td><td>1</td></tr>
+              <tr><td><strong>A</strong> — Věk 65–74 let</td><td>1</td></tr>
+              <tr><td><strong>Sc</strong> — Pohlaví (žena)</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+    <hr class="field-divider">
+
+    <!-- Teritoriální infarkt -->
+    <div class="field">
+      <label class="field-label">Typ akutní ischemie</label>
+      <p class="field-hint">Z propouštěcí zprávy nebo zobrazovacího vyšetření (CT / MRI mozku)</p>
+      <div class="toggle-group" role="radiogroup" aria-label="Typ ischemie">
+        <input type="radio" name="terit" id="terit-yes" value="1">
+        <label for="terit-yes">Teritoriální</label>
+        <input type="radio" name="terit" id="terit-no" value="0" checked>
+        <label for="terit-no">Jiný / lakunární / neznámý</label>
+      </div>
+
+      <details class="field-detail">
+        <summary>Co je teritoriální infarkt?</summary>
+        <div class="detail-body">
+          <p>Velký kortikální nebo kortiko-subkortikální infarkt postihující celý nebo podstatnou část povodí mozkové tepny (nejčastěji <em>a. cerebri media</em> nebo <em>a. cerebri anterior</em>). Opakem je lakunární infarkt — malý, hluboký, subkortikální.</p>
+        </div>
+      </details>
+    </div>
+
+    <hr class="field-divider">
+
+    <!-- Hyperlipidémie -->
+    <div class="field">
+      <label class="field-label">Hyperlipidémie v osobní anamnéze</label>
+      <p class="field-hint">Anamnesticky diagnostikovaná dyslipidemie &mdash; přítomnost v modelu <strong>snižuje</strong> predikované riziko (pacienti s hyperlipidémií jsou obvykle léčeni statiny)</p>
+      <div class="toggle-group" role="radiogroup" aria-label="Hyperlipidémie">
+        <input type="radio" name="hlp" id="hlp-yes" value="1">
+        <label for="hlp-yes">Ano</label>
+        <input type="radio" name="hlp" id="hlp-no" value="0" checked>
+        <label for="hlp-no">Ne / neznámo</label>
+      </div>
+
+      <details class="field-detail">
+        <summary>Proč hyperlipidémie snižuje predikované riziko?</summary>
+        <div class="detail-body">
+          <p>Model přiřazuje hyperlipidémii <strong>záporný koeficient (−10,0 bodů)</strong> — přítomnost hyperlipidémie tedy predikované riziko snižuje. Pravděpodobnou příčinou je <strong>treatment paradox</strong>: pacienti s diagnostikovanou hyperlipidémií jsou ve většině případů léčeni statiny, které mají prokázaný antiarytmický efekt snižující incidenci FiS.</p>
+          <p style="margin-top:8px;">Data STROCZE neobsahují informaci o konkrétní medikaci, takže tento mechanismus nelze přímo ověřit. Výsledek u pacientů s hyperlipidémií interpretujte s ohledem na celkový klinický obraz.</p>
+        </div>
+      </details>
+    </div>
+
+    <button class="btn-calculate" type="button" onclick="calculate()">
+      Vypočítat riziko FiS
+    </button>
+  </section>
+
+  <!-- ── Result card ── -->
+  <section class="card" id="result" hidden aria-live="polite">
+
+    <div class="result-badge cat-low" id="result-badge">
+      <span class="cat-label">Riziková kategorie</span>
+      <span class="cat-name" id="result-cat-name">—</span>
+      <span class="cat-desc" id="result-cat-desc">—</span>
+    </div>
+
+    <div class="result-stats" style="margin-top:14px;">
+      <div class="stat-box">
+        <div class="stat-label">Pravděp. záchytu FiS</div>
+        <div class="stat-value" id="result-prob">—</div>
+        <div class="stat-sub">kalibrovaná (Platt)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Poměr k prevalenci</div>
+        <div class="stat-value" id="result-ratio">—</div>
+        <div class="stat-sub" id="result-ratio-sub">kohorta STROCZE 5.8 %</div>
+      </div>
+    </div>
+
+    <!-- NPV note — shown only for Nízké -->
+    <div class="npv-note" id="npv-note" hidden>
+      <strong>NPV kategorie Nízké: 95,7 %</strong> — ze 100 pacientů zařazených do této kategorie nebude FiS při holterovské monitoraci zachycena přibližně u 95–96 z nich.
+    </div>
+
+    <!-- Treatment paradox notice — shown when hlp=1 -->
+    <div class="tp-notice" id="tp-notice" hidden>
+      <span class="tp-icon">⚠</span>
+      <span><strong>Poznámka k hyperlipidémii:</strong> Model přiřazuje hyperlipidémii záporný koeficient. Pravděpodobnou příčinou je léčba statiny (treatment paradox) — data STROCZE neobsahují informaci o medikaci, takže tuto hypotézu nelze přímo ověřit. Výsledek interpretujte s ohledem na celkový klinický obraz.</span>
+    </div>
+
+    <p class="disclaimer-inline">
+      Výstup je <strong>podpůrná informace</strong> pro stratifikaci. Klinické rozhodnutí o indikaci holterovské monitorace zůstává výhradně v kompetenci ošetřujícího lékaře.
+    </p>
+  </section>
+
+  <!-- ═══════════════════════════ ACCORDION: Klinické pozadí ══ -->
+  <details class="card accordion">
+    <summary>Klinické pozadí a přínos modelu</summary>
+    <div class="accordion-body">
+
+      <h3>Proč stratifikovat?</h3>
+      <p>Fibrilace síní (FiS) je příčinou 20–30 % ischemických cévních mozkových příhod (iCMP). U pacientů po iCMP nebo TIA je záchyt dosud neznámé FiS klíčový pro volbu sekundárně preventivní terapie — antikoagulační léčba snižuje riziko recidivy CMP o 60–70 %. FiS je však paroxyzmální a standardní 12-svodové EKG ji zachytí jen tehdy, probíhá-li právě v okamžiku záznamu. Dlouhodobá holterovská monitorace (24–48 h) výrazně zvyšuje senzitivitu záchytu.</p>
+
+      <h3>Co model přináší</h3>
+      <p>Bez stratifikace je k záchytu 1 případu FiS nutné monitorovat průměrně <strong>17,1 pacientů</strong> (NNM — Number Needed to Monitor). Tento model umožňuje vyloučit nízkorizikové pacienty z prioritní monitorace a snižuje NNM na <strong>12,8 (−25 %)</strong> při zachování senzitivity 95,5 % — ze 22 pacientů s FiS v testovacím souboru bylo 21 správně identifikováno.</p>
+
+      <h3>Data a model</h3>
+      <p>Model byl vytrénován na kohortě <strong>STROCZE (Czech Stroke Research database)</strong> shromažďované centrem MDT Brno: 5 083 záznamů celkem, 1 884 kompletních (37,1 %), 111 FiS+ (5,9 % prevalence).</p>
+      <p>Z 8 kandidátních proměnných vybral algoritmus RFECV (Recursive Feature Elimination with Cross-Validation) <strong>3 prediktory</strong>: CHA₂DS₂-VASc skóre, teritoriální infarkt a hyperlipidémii v anamnéze. Model používá logistickou regresi s kalibrací Platt scalingem, aby výstupní pravděpodobnosti odpovídaly skutečné kohortové prevalenci.</p>
+
+      <h3>Kategorie rizika</h3>
+      <table class="cat-table">
+        <thead>
+          <tr><th>Kategorie</th><th>Pravděpodobnost</th><th>Doporučení</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cat-dot low"></span><strong>Nízké</strong></td>
+            <td>&lt; 5,8 % (&lt; 1× prevalence)</td>
+            <td>Standardní sledování; holterovská monitorace s nízkou prioritou (NPV 95,7 %)</td>
+          </tr>
+          <tr>
+            <td><span class="cat-dot med"></span><strong>Střední</strong></td>
+            <td>5,8–8,7 % (1–1,5×)</td>
+            <td>Mírně zvýšené riziko; zvažte holterovskou monitoraci</td>
+          </tr>
+          <tr>
+            <td><span class="cat-dot high"></span><strong>Vysoké</strong></td>
+            <td>8,7–11,7 % (1,5–2×)</td>
+            <td>Výrazně zvýšené riziko; holterovská monitorace doporučena</td>
+          </tr>
+          <tr>
+            <td><span class="cat-dot vhigh"></span><strong>Velmi vysoké</strong></td>
+            <td>&gt; 11,7 % (&gt; 2×)</td>
+            <td>Silné doporučení k holterovské monitoraci</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- ═══════════════════════════ ACCORDION: Výkon modelu ══ -->
+  <details class="card accordion">
+    <summary>Výkon modelu — metriky</summary>
+    <div class="accordion-body">
+
+      <p>Testovací soubor: <strong>n = 377 pacientů</strong> (FiS+ = 22, FiS− = 355), vyčleněn před tréninkem. Koeficienty ani kalibrace nebyly na tomto souboru trénovány.</p>
+
+      <table class="metrics-table">
+        <thead>
+          <tr><th>Metrika</th><th>Hodnota</th><th>95% CI (bootstrap, 1 000×)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AUC-ROC</td><td>0,647</td><td>[0,543 – 0,740]</td></tr>
+          <tr><td>Senzitivita</td><td>95,5 %</td><td>[86,4 % – 100,0 %]</td></tr>
+          <tr><td>Specificita</td><td>30,1 %</td><td>[25,4 % – 34,7 %]</td></tr>
+          <tr><td>NPV (kategorie Nízké)</td><td>95,7 %</td><td>—</td></tr>
+          <tr><td>NPV (celkové)</td><td>99,1 %</td><td>—</td></tr>
+          <tr><td>Brier skóre (kalibrovaný)</td><td>0,0545</td><td>—</td></tr>
+          <tr><td>EPV</td><td>29,7</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Matice záměn (Youdenův optimální práh = 4,1 %)</h3>
+      <div class="conf-grid">
+        <div class="cf-header"></div>
+        <div class="cf-header">Predikce: FiS+</div>
+        <div class="cf-header">Predikce: FiS−</div>
+
+        <div class="cf-row-label">Skutečnost:<br>FiS+</div>
+        <div class="cf-cell cf-tp">
+          <span class="cf-num">21</span>
+          <span class="cf-lbl">TP — správně</span>
+        </div>
+        <div class="cf-cell cf-fn">
+          <span class="cf-num">1</span>
+          <span class="cf-lbl">FN — přehlédnuta</span>
+        </div>
+
+        <div class="cf-row-label">Skutečnost:<br>FiS−</div>
+        <div class="cf-cell cf-fp">
+          <span class="cf-num">248</span>
+          <span class="cf-lbl">FP — zbytečný mon.</span>
+        </div>
+        <div class="cf-cell cf-tn">
+          <span class="cf-num">107</span>
+          <span class="cf-lbl">TN — správně vyloučena</span>
+        </div>
+      </div>
+
+      <h3>Koeficienty modelu</h3>
+      <table class="metrics-table">
+        <thead>
+          <tr><th>Prediktor</th><th>Body / jednotku</th><th>Směr</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>CHA₂DS₂-VASc</td><td>+11,0</td><td>Vyšší skóre → vyšší riziko</td></tr>
+          <tr><td>Teritoriální infarkt</td><td>+10,3</td><td>Přítomen → vyšší riziko</td></tr>
+          <tr><td>Hyperlipidémie</td><td>−10,0</td><td>Přítomna → nižší riziko <span title="Treatment paradox — viz Limitace">ⓘ</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- ═══════════════════════════ ACCORDION: Limitace ══ -->
+  <details class="card accordion">
+    <summary>Limitace a správné použití</summary>
+    <div class="accordion-body">
+
+      <h3>Co model dělá a nedělá</h3>
+      <p>Model <strong>neprovádí diagnózu FiS</strong> — odhaduje pravděpodobnost, že FiS bude zachycena při dlouhodobé holterovské monitoraci. Nenahrazuje klinické rozhodnutí ani neurčuje antikoagulační léčbu.</p>
+
+      <h3>Rozsah platnosti</h3>
+      <p>Kalkulátor byl vytrénován a validován výhradně na kohortě STROCZE (pacienti po iCMP/TIA). Použití u jiných populací (primární prevence, kardiologické diagnózy mimo CMP) není ověřeno.</p>
+
+      <h3>Interní validace</h3>
+      <p>Testovací soubor (n = 377) pochází ze stejné kohorty jako trénovací data — jedná se o <strong>interní validaci</strong>, nikoliv o nezávislou prospektivní validaci. Před rutinním klinickým nasazením je prospektivní validace na nových pacientech nezbytná.</p>
+
+      <h3>Záporný koeficient hyperlipidémie (treatment paradox)</h3>
+      <p>Přítomnost hyperlipidémie v anamnéze snižuje predikované riziko. Pravděpodobnou příčinou je, že pacienti s diagnostikovanou hyperlipidémií jsou ve většině případů léčeni statiny, které mají prokázaný antiarytmický efekt snižující incidenci FiS. Data STROCZE neobsahují informaci o medikaci, a proto tuto hypotézu nelze přímo ověřit. Výsledek u pacientů s hyperlipidémií interpretujte s ohledem na toto omezení.</p>
+
+      <h3>Nízká specificita</h3>
+      <p>Model byl optimalizován pro maximální senzitivitu (záchyt FiS). Specificita je vědomě nízká (30,1 %) — ze 248 pacientů predikovaných jako FiS+ bude většina při monitoraci negativní. Model je navržen jako screeningový nástroj pro <em>vyloučení</em> nízkorizikových pacientů, nikoliv jako potvrzující diagnostický test.</p>
+    </div>
+  </details>
+
+</div><!-- /.container -->
+</main>
+
+<!-- ════════════════════════════════════════════════════════════ FOOTER ══ -->
+<footer>
+  <div class="container footer-inner">
+    <div class="footer-disclaimer">
+      ⚠ Výzkumný prototyp financovaný projektem [TAČR-XXXX]. Není schválen pro autonomní klinické rozhodování.
+    </div>
+    <div class="footer-contacts">
+      <span>Valentýna Provazník &mdash; <a href="mailto:provaznik@vut.cz">provaznik@vut.cz</a> (VUT Brno)</span>
+      <span>Veronika Bulková &mdash; <a href="mailto:veronika.bulkova@gmail.com">veronika.bulkova@gmail.com</a> (MDT s.r.o.)</span>
+      <span>Richard Ředina &mdash; <a href="mailto:195715@vut.cz">195715@vut.cz</a> (VUT Brno)</span>
+    </div>
+    <div class="footer-meta">
+      <a href="https://github.com/RicRedi/Chadsvasc" target="_blank" rel="noopener">GitHub repozitář</a>
+      <span>&middot;</span>
+      <span>Kohorta STROCZE &middot; MDT Brno</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════ SCRIPT ══ -->
+<script src="assets/scorecard.js"></script>
+<script>
+  /* ── Stepper ── */
+  function stepCha(delta) {
+    const inp = document.getElementById('cha');
+    const val = (parseInt(inp.value, 10) || 0) + delta;
+    inp.value = Math.max(0, Math.min(9, val));
+  }
+
+  function clampCha() {
+    const inp = document.getElementById('cha');
+    let val = parseInt(inp.value, 10);
+    if (isNaN(val)) { inp.value = 0; return; }
+    inp.value = Math.max(0, Math.min(9, val));
+  }
+
+  /* ── Prediction ── */
+  function calculate() {
+    const chaEl = document.getElementById('cha');
+    const cha = parseInt(chaEl.value, 10);
+
+    if (isNaN(cha) || cha < 0 || cha > 9) {
+      chaEl.focus();
+      chaEl.style.outline = '2px solid #ef4444';
+      setTimeout(() => { chaEl.style.outline = ''; }, 1500);
+      return;
+    }
+
+    const terit = parseInt(document.querySelector('input[name="terit"]:checked').value, 10);
+    const hlp   = parseInt(document.querySelector('input[name="hlp"]:checked').value, 10);
+
+    /* Platt-calibrated logistic regression
+       p = 1 / (1 + exp(platt_a * logit + platt_b))   [sklearn convention] */
+    const logit = SCORECARD.lr_intercept
+      + SCORECARD.lr_coefs.CHA2DS2VASc    * cha
+      + SCORECARD.lr_coefs.Teritorialni   * terit
+      + SCORECARD.lr_coefs.Hyperlipidemie * hlp;
+
+    const prob  = 1.0 / (1.0 + Math.exp(SCORECARD.platt_a * logit + SCORECARD.platt_b));
+    const ratio = prob / SCORECARD.prevalence;
+
+    /* Category */
+    let catKey, catName, catDesc;
+    if (ratio < 1.0) {
+      catKey = 'low';   catName = 'Nízké';        catDesc = 'FiS nepravděpodobná';
+    } else if (ratio < 1.5) {
+      catKey = 'med';   catName = 'Střední';       catDesc = 'Mírně zvýšené riziko záchytu FiS';
+    } else if (ratio < 2.0) {
+      catKey = 'high';  catName = 'Vysoké';        catDesc = 'Výrazně zvýšené riziko záchytu FiS';
+    } else {
+      catKey = 'vhigh'; catName = 'Velmi vysoké';  catDesc = 'Silné doporučení k holterovské monitoraci';
+    }
+
+    /* Update DOM */
+    const badge = document.getElementById('result-badge');
+    badge.className = 'result-badge cat-' + catKey;
+    document.getElementById('result-cat-name').textContent = catName;
+    document.getElementById('result-cat-desc').textContent = catDesc;
+
+    document.getElementById('result-prob').textContent  = (prob  * 100).toFixed(1) + ' %';
+    document.getElementById('result-ratio').textContent = ratio.toFixed(1) + '×';
+    document.getElementById('result-ratio-sub').textContent =
+      'kohorta STROCZE ' + (SCORECARD.prevalence * 100).toFixed(1) + ' %';
+
+    document.getElementById('npv-note').hidden   = (catKey !== 'low');
+    document.getElementById('tp-notice').hidden  = (hlp !== 1);
+
+    const resultEl = document.getElementById('result');
+    resultEl.hidden = false;
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* Allow Enter key to trigger calculation */
+  document.getElementById('cha').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') calculate();
+  });
+</script>
+
+</body>
+</html>

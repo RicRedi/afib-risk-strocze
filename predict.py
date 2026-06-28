@@ -208,7 +208,8 @@ if __name__ == "__main__":
           f"[{tp.get('auc_ci_lower', 0):.3f} – {tp.get('auc_ci_upper', 0):.3f}]  95% CI")
     print(f"  Brier score: {cal.get('brier_calibrated', 0):.4f}  (kalibrovaný model)")
     print(f"  NPV:         {cal.get('calibrated_npv', 0):.3f}  "
-          f"— při kategorii Nízké je FiS vyloučena s {cal.get('calibrated_npv', 0)*100:.0f}% jistotou")
+          f"— při kategorii Nízké je FiS vyloučena s {\
+              cal.get('calibrated_npv', 0)*100:.0f}% jistotou")
     print(f"  Poznámka: threshold pro bin. rozhodnutí volí lékař — "
           f"kategorie (níže) jsou primárním výstupem")
 
@@ -274,7 +275,8 @@ if __name__ == "__main__":
         print(f"  ┌─────────────────────────────────────────┐")
         print(f"  │  RIZIKO FiS:  {cat['category']:<27}│")
         print(f"  │  {cat['description']:<41}│")
-        print(f"  │  ({cat['ratio_to_prevalence']:.1f}× kohortová prevalence {prevalence*100:.1f} %)   │")
+        print(f"  │  ({\
+            cat['ratio_to_prevalence']:.1f}× kohortová prevalence {prevalence*100:.1f} %)   │")
         print(f"  └─────────────────────────────────────────┘")
         print(f"  Kalibrovaná pravděpodobnost: {prob*100:.1f} %")
         print(f"  Bodové skóre:                {score['total_points']:.1f} bodů")
@@ -285,9 +287,11 @@ if __name__ == "__main__":
     print(f"  {'Pacient':<32} {'Kategorie':<16} {'Pravděp.':>9}  {'×prevalence':>11}")
     print(f"  {'-'*32} {'-'*16} {'-'*9}  {'-'*11}")
     for r in results:
-        print(f"  {r['label']:<32} {r['category']:<16} {r['prob']*100:>8.1f} %  {r['ratio']:>10.1f}×")
+        print(
+            f"  {r['label']:<32} {r['category']:<16} {r['prob']*100:>8.1f} %  {r['ratio']:>10.1f}×")
 
-    print(f"\n  Kohortová prevalence FiS: {prevalence*100:.1f} %  (n={tp.get('n_positive','?')}/{tp.get('n_test','?')})")
+    print(f"\n  Kohortová prevalence FiS: {\
+        prevalence*100:.1f} %  (n={tp.get('n_positive','?')}/{tp.get('n_test','?')})")
     print(f"  Kategorie jsou definovány jako násobky kohortové prevalence:")
     print(f"    < 1×   → Nízké  |  1–1.5× → Střední  |  1.5–2× → Vysoké  |  > 2× → Velmi vysoké")
     print()
