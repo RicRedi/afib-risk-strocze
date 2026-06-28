@@ -3,7 +3,7 @@
 
 ---
 
-**Projekt:** [TAČR-XXXX] — Identifikace rizikových faktorů fibrilace síní  
+**Projekt:** NCK FEIM - DP001N (Healthcare) — Identifikace rizikových faktorů fibrilace síní  
 **Verze dokumentu:** 1.0  
 **Datum:** 2026-06-27  
 **Autoři:** Valentýna Provazník, Veronika Bulková, Richard Ředina  
@@ -74,7 +74,7 @@ Binární proměnná (ano / ne). Anamnesticky diagnostikovaná hyperlipidémie (
 
 ### 4.1 HTML kalkulačka (doporučeno)
 
-1. Otevřete v internetovém prohlížeči adresu: `https://ricRedi.github.io/Chadsvasc/`
+1. Otevřete v internetovém prohlížeči adresu: `https://ricRedi.github.io/afib-risk-strocze/`
 2. Zadejte hodnotu CHA₂DS₂-VASc (celé číslo 0–9).
 3. Vyberte typ akutní ischemie: **Teritoriální** nebo **Jiný / lakunární / neznámý**.
 4. Vyberte, zda má pacient hyperlipidémii v anamnéze: **Ano** nebo **Ne / neznámo**.
@@ -87,8 +87,8 @@ Kalkulačka funguje i na mobilních zařízeních (telefon, tablet) bez nutnosti
 
 ```bash
 # Klonovat repozitář a nainstalovat závislosti
-git clone https://github.com/RicRedi/Chadsvasc.git
-cd Chadsvasc
+git clone https://github.com/RicRedi/afib-risk-strocze.git
+cd afib-risk-strocze
 pip install -r requirements.txt
 
 # Spustit demo
@@ -162,4 +162,4 @@ Vysoké učení technické v Brně
 
 ---
 
-*Tento nástroj je výzkumným prototypem financovaným projektem [TAČR-XXXX]. Není schválen pro samostatné klinické rozhodování.*
+*Tento nástroj je výzkumným prototypem financovaným projektem NCK FEIM - DP001N (Healthcare). Není schválen pro samostatné klinické rozhodování.*

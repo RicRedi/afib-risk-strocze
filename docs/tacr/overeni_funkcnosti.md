@@ -3,7 +3,7 @@
 
 ---
 
-**Projekt:** [TAČR-XXXX] — Identifikace rizikových faktorů fibrilace síní  
+**Projekt:** NCK FEIM - DP001N (Healthcare) — Identifikace rizikových faktorů fibrilace síní  
 **Verze dokumentu:** 1.0  
 **Datum:** 2026-06-27  
 **Autoři:** Valentýna Provazník, Veronika Bulková, Richard Ředina  
@@ -98,8 +98,8 @@ Systém je plně deterministický při fixním nastavení `random_state=42`. Rep
 
 ```bash
 # 1. Klonovat repozitář a nainstalovat závislosti
-git clone https://github.com/RicRedi/Chadsvasc.git
-cd Chadsvasc
+git clone https://github.com/RicRedi/afib-risk-strocze.git
+cd afib-risk-strocze
 pip install -r requirements.txt
 
 # 2. Poskytnout zdrojová data (src/ — není součástí repozitáře, nutno dodat)
@@ -207,4 +207,4 @@ Aktuální EPV = 29,7 umožňuje bezpečně pracovat se 3 prediktory. Pokud by b
 
 ---
 
-*Dokument připraven v rámci projektu [TAČR-XXXX]. Verze 1.0, 2026-06-27.*
+*Dokument připraven v rámci projektu NCK FEIM - DP001N (Healthcare). Verze 1.0, 2026-06-27.*

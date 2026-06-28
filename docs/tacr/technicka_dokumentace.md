@@ -3,7 +3,7 @@
 
 ---
 
-**Projekt:** [TAČR-XXXX] — Identifikace rizikových faktorů fibrilace síní  
+**Projekt:** NCK FEIM - DP001N (Healthcare) — Identifikace rizikových faktorů fibrilace síní  
 **Verze dokumentu:** 1.0  
 **Datum:** 2026-06-27  
 **Autoři:** Valentýna Provazník, Veronika Bulková, Richard Ředina  
@@ -262,4 +262,4 @@ const result = predict(cha2ds2=5, terit=1, hlp=0);
 
 ---
 
-*Dokument připraven v rámci projektu [TAČR-XXXX]. Verze 1.0, 2026-06-27.*
+*Dokument připraven v rámci projektu NCK FEIM - DP001N (Healthcare). Verze 1.0, 2026-06-27.*

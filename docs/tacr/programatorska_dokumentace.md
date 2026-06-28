@@ -3,7 +3,7 @@
 
 ---
 
-**Projekt:** [TAČR-XXXX] — Identifikace rizikových faktorů fibrilace síní  
+**Projekt:** NCK FEIM - DP001N (Healthcare) — Identifikace rizikových faktorů fibrilace síní  
 **Verze dokumentu:** 1.0  
 **Datum:** 2026-06-27  
 **Autoři:** Valentýna Provazník, Veronika Bulková, Richard Ředina  
@@ -35,8 +35,8 @@ Kompletní seznam závislostí je v souboru `requirements.txt` v kořeni repozit
 ### 2.1 Klonování repozitáře
 
 ```bash
-git clone https://github.com/RicRedi/Chadsvasc.git
-cd Chadsvasc
+git clone https://github.com/RicRedi/afib-risk-strocze.git
+cd afib-risk-strocze
 ```
 
 ### 2.2 Vytvoření virtuálního prostředí
@@ -76,7 +76,7 @@ Při prvním spuštění bez uloženého modelu (`results/risk_model_calibrated.
 ## 3. Struktura repozitáře
 
 ```
-Chadsvasc/
+afib-risk-strocze/
 ├── README.md                          # Vstupní bod projektu
 ├── requirements.txt                   # Python závislosti
 ├── .gitignore                         # Vylučuje src/, *.joblib, .env/
@@ -302,4 +302,4 @@ Skripty načítají data výhradně ze souboru `results/risk_scorecard.json` a z
 
 ---
 
-*Dokument připraven v rámci projektu [TAČR-XXXX]. Verze 1.0, 2026-06-27.*
+*Dokument připraven v rámci projektu NCK FEIM - DP001N (Healthcare). Verze 1.0, 2026-06-27.*

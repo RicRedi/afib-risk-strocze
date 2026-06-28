@@ -87,7 +87,7 @@ def predict_from_scorecard(score_card: dict, patient_dict: dict) -> dict:
     }
 
 
-def risk_category(probability: float, prevalence: float) -> dict:
+def risk_category(probability: float, preval: float) -> dict:
     """
     Maps a calibrated probability to a risk category relative to cohort prevalence.
 
@@ -99,12 +99,12 @@ def risk_category(probability: float, prevalence: float) -> dict:
 
     Args:
         probability: Calibrated AFib probability (0–1)
-        prevalence:  Cohort AFib prevalence (from scorecard test_performance)
+        preval:  Cohort AFib prevalence (from scorecard test_performance)
 
     Returns:
         dict with category, description, ratio_to_prevalence
     """
-    ratio = probability / prevalence if prevalence > 0 else 0.0
+    ratio = probability / preval if preval > 0 else 0.0
 
     if ratio < 1.0:
         category, description = "Nízké", "FiS nepravděpodobná"
@@ -187,11 +187,11 @@ if __name__ == "__main__":
 
     print(f"\nOriginal features considered: {len(all_features)}")
     print(f"Features selected by model:   {len(selected_features)}")
-    for f in selected_features:
-        ppu = scorecard['variables'][f]['points_per_unit']
-        ftype = scorecard['variables'][f]['type']
-        print(f"  • {f}  [{ftype}, {ppu:+.2f} pts/unit]")
-        if "Hyperlipid" in f and ppu < 0:
+    for feat in selected_features:
+        ppu = scorecard['variables'][feat]['points_per_unit']
+        ftype = scorecard['variables'][feat]['type']
+        print(f"  • {feat}  [{ftype}, {ppu:+.2f} pts/unit]")
+        if "Hyperlipid" in feat and ppu < 0:
             for line in HLP_NOTE.split(". "):
                 line = line.strip().rstrip(".")
                 if line:
@@ -210,8 +210,8 @@ if __name__ == "__main__":
     print(f"  NPV:         {cal.get('calibrated_npv', 0):.3f}  "
           f"— při kategorii Nízké je FiS vyloučena s {\
               cal.get('calibrated_npv', 0)*100:.0f}% jistotou")
-    print(f"  Poznámka: threshold pro bin. rozhodnutí volí lékař — "
-          f"kategorie (níže) jsou primárním výstupem")
+    print("  Poznámka: threshold pro bin. rozhodnutí volí lékař — "
+          "kategorie (níže) jsou primárním výstupem")
 
     # -------------------------------------------------------------------------
     # Sample patients — feature names taken directly from the scorecard to
@@ -265,19 +265,19 @@ if __name__ == "__main__":
         print(f"  {p['label']}")
         print(f"  {p['desc']}")
         print(f"{'─'*60}")
-        print(f"  Vstupy:")
+        print("  Vstupy:")
         for feat, val in p["data"].items():
             short = feat.split("(")[0].strip()
             ftype = scorecard['variables'].get(feat, {}).get('type', 'continuous')
             label = ("ano" if val == 1 else "ne") if ftype == 'binary' else str(val)
             print(f"    • {short:<35} {label}")
         print()
-        print(f"  ┌─────────────────────────────────────────┐")
+        print("  ┌─────────────────────────────────────────┐")
         print(f"  │  RIZIKO FiS:  {cat['category']:<27}│")
         print(f"  │  {cat['description']:<41}│")
         print(f"  │  ({\
             cat['ratio_to_prevalence']:.1f}× kohortová prevalence {prevalence*100:.1f} %)   │")
-        print(f"  └─────────────────────────────────────────┘")
+        print("  └─────────────────────────────────────────┘")
         print(f"  Kalibrovaná pravděpodobnost: {prob*100:.1f} %")
         print(f"  Bodové skóre:                {score['total_points']:.1f} bodů")
 
@@ -292,6 +292,6 @@ if __name__ == "__main__":
 
     print(f"\n  Kohortová prevalence FiS: {\
         prevalence*100:.1f} %  (n={tp.get('n_positive','?')}/{tp.get('n_test','?')})")
-    print(f"  Kategorie jsou definovány jako násobky kohortové prevalence:")
-    print(f"    < 1×   → Nízké  |  1–1.5× → Střední  |  1.5–2× → Vysoké  |  > 2× → Velmi vysoké")
+    print("  Kategorie jsou definovány jako násobky kohortové prevalence:")
+    print("    < 1×   → Nízké  |  1–1.5× → Střední  |  1.5–2× → Vysoké  |  > 2× → Velmi vysoké")
     print()
