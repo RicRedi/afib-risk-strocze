@@ -17,7 +17,7 @@
 
 Fibrilace síní (FiS) je nejčastější porucha srdečního rytmu a příčina 20–30 % ischemických cévních mozkových příhod (iCMP). U pacientů po iCMP nebo tranzitorní ischemické atace (TIA) je záchyt dosud neznámé FiS klíčový pro volbu sekundárně preventivní terapie: při potvrzené FiS je indikována antikoagulační léčba, která snižuje riziko recidivy CMP o 60–70 %.
 
-Diagnostika FiS je obtížná, protože FiS může být paroxyzmální (záchvatovitá) a standardní 12-svodové EKG ji zachytí pouze tehdy, probíhá-li právě v okamžiku záznamu. Dlouhodobý MDT (Medical Data Transfer) monitoring — 24–48hodinové Holter EKG záznamy prováděné firmou MDT Brno — výrazně zvyšuje senzitivitu záchytu.
+Diagnostika FiS je obtížná, protože FiS může být paroxyzmální (záchvatovitá) a standardní 12-svodové EKG ji zachytí pouze tehdy, probíhá-li právě v okamžiku záznamu. 24–48hodinové Holter EKG záznamy výrazně zvyšují senzitivitu záchytu.
 
 ### 1.2 Stávající praxe a její limitace
 
